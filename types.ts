@@ -2,7 +2,8 @@
 
 export enum ProviderType {
   ECOBEE = 'ECOBEE',
-  HONEYWELL = 'HONEYWELL'
+  HONEYWELL = 'HONEYWELL',
+  NEST = 'NEST'
 }
 
 export enum HvacMode {
