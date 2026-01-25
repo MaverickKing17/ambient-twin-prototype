@@ -38,6 +38,8 @@ export const Dashboard: React.FC = () => {
       handleProviderSelect(ProviderType.ECOBEE, false);
     } else if (thermostatConnector.isConnected(ProviderType.NEST)) {
       handleProviderSelect(ProviderType.NEST, false);
+    } else if (thermostatConnector.isConnected(ProviderType.HONEYWELL)) {
+      handleProviderSelect(ProviderType.HONEYWELL, false);
     }
   }, []);
 
@@ -61,16 +63,27 @@ export const Dashboard: React.FC = () => {
       setCertificate(null); // Reset certificate on new connection
 
       // 4. Simulate ML Prediction based on new data
-      const isNest = provider === ProviderType.NEST;
       setTimeout(() => {
+        let strainScore = 35;
+        let efficiencyIndex = 0.92;
+        let recommendations = ['Check filter in 15 days', 'Optimized for rebate tier 1'];
+
+        if (provider === ProviderType.NEST) {
+          strainScore = 24;
+          efficiencyIndex = 0.96;
+          recommendations = ['System optimized', 'Continue usage pattern'];
+        } else if (provider === ProviderType.HONEYWELL) {
+          strainScore = 29;
+          efficiencyIndex = 0.94;
+          recommendations = ['Calibration recommended', 'Cycle times are optimal'];
+        }
+
         setPrediction({
-          strainScore: isNest ? 24 : 35, // Nest simulated as slightly better
-          efficiencyIndex: isNest ? 0.96 : 0.92,
+          strainScore,
+          efficiencyIndex,
           predictedFailureRisk: 'LOW',
           anomalies: [],
-          recommendations: isNest 
-            ? ['System optimized', 'Continue usage pattern'] 
-            : ['Check filter in 15 days', 'Optimized for rebate tier 1']
+          recommendations
         });
       }, 800);
 
@@ -111,9 +124,9 @@ export const Dashboard: React.FC = () => {
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
             Digital Twin Dashboard
           </h1>
-          <div className="mt-2 flex items-center gap-3">
+          <div className="mt-2 flex items-center gap-3 flex-wrap">
             {!connectedProvider ? (
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <button 
                   onClick={() => handleProviderSelect(ProviderType.ECOBEE)}
                   disabled={isConnecting}
@@ -127,6 +140,13 @@ export const Dashboard: React.FC = () => {
                    className="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium transition-colors flex items-center gap-2"
                 >
                    {isConnecting ? 'Connecting...' : 'Connect Nest'}
+                </button>
+                <button 
+                   onClick={() => handleProviderSelect(ProviderType.HONEYWELL)}
+                   disabled={isConnecting}
+                   className="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium transition-colors flex items-center gap-2"
+                >
+                   {isConnecting ? 'Connecting...' : 'Connect Honeywell'}
                 </button>
               </div>
             ) : (
@@ -160,7 +180,7 @@ export const Dashboard: React.FC = () => {
             </div>
             <h2 className="text-xl font-bold text-white mb-2">Connect Your Thermostat</h2>
             <p className="text-white/60 mb-6">
-              Link your Ecobee or Nest account to ingest live telemetry, analyze system strain, and mint your efficiency certificate.
+              Link your Ecobee, Nest, or Honeywell account to ingest live telemetry, analyze system strain, and mint your efficiency certificate.
             </p>
           </GlassCard>
         </div>

@@ -103,11 +103,28 @@ export class ThermostatConnector {
     // Create unique data profiles based on provider to visualize difference in UI
     const now = Date.now();
     const isNest = provider === ProviderType.NEST;
+    const isHoneywell = provider === ProviderType.HONEYWELL;
     
     // Nest profile: Higher efficiency, smoother curves
+    // Honeywell profile: Very stable (low variance), solid power usage
     // Ecobee profile: More frequent updates, slightly more noise simulated
-    const baseTemp = isNest ? 21.5 : 20.5;
-    const variance = isNest ? 0.5 : 1.5;
+    
+    let baseTemp = 20.5;
+    let variance = 1.5;
+    let firmware = 'Eco-4.2.0';
+    let basePower = 2200;
+
+    if (isNest) {
+        baseTemp = 21.5;
+        variance = 0.5;
+        firmware = 'NestOS-5.4';
+        basePower = 1800;
+    } else if (isHoneywell) {
+        baseTemp = 21.0;
+        variance = 0.2; // Very stable temp control
+        firmware = 'Lyric-T6-Pro';
+        basePower = 2000;
+    }
 
     const readings: TelemetryReading[] = Array.from({ length: 24 }, (_, i) => ({
       timestamp: new Date(now - (23 - i) * 3600000).toISOString(),
@@ -118,13 +135,13 @@ export class ThermostatConnector {
       fanStatus: i % 3 === 0,
       compressorStatus: i % 3 === 0,
       hvacMode: HvacMode.AUTO,
-      powerUsageWatts: (i % 3 === 0) ? (isNest ? 1800 : 2200) : 150 // Nest simulated as more efficient
+      powerUsageWatts: (i % 3 === 0) ? basePower : 150
     }));
 
     return {
       readings,
       metadata: {
-        firmwareVersion: isNest ? 'NestOS-5.4' : 'Eco-4.2.0',
+        firmwareVersion: firmware,
         lastServiceDate: '2024-01-10',
         sqFootage: 2400
       }
