@@ -49,11 +49,18 @@ export interface SystemStrainPrediction {
 // Web 3.0 Ledger Interface
 export interface EfficiencyCertificate {
   id: string;
-  blockHash: string;
+  assetHash: string; // Renamed from blockHash to match prompt semantics
   deviceId: string;
   timestamp: number;
   efficiencyScore: number;
+  grade: 'A+' | 'A' | 'B' | 'C' | 'D'; // New Efficiency Grade
+  metrics: {
+    seer2: number;
+    hspf2: number;
+  };
   savingsProjected: number;
   signature: string;
   status: 'PENDING' | 'VERIFIED' | 'MINTED';
+  isPublished: boolean;
+  publicUrl?: string;
 }
