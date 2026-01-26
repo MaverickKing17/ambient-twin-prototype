@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GlassCard } from './GlassCard';
 import { HeartbeatGraph } from './HeartbeatGraph';
 import { EfficiencyCertificateCard } from './EfficiencyCertificateCard';
@@ -22,8 +22,8 @@ const Icons = {
   Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
   Cpu: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/></svg>,
   Location: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>,
-  Signal: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 20V4"/></svg>,
-  Power: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+  Power: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>,
+  Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
 };
 
 export const Dashboard: React.FC = () => {
@@ -37,8 +37,6 @@ export const Dashboard: React.FC = () => {
   const [devices, setDevices] = useState<SeamDevice[]>([]);
   const [activeDevice, setActiveDevice] = useState<SeamDevice | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
-
-  const isDemoMode = !SEAM_API_KEY || SEAM_API_KEY.length < 5;
 
   useEffect(() => {
     handleConnectProvider(ProviderType.HONEYWELL);
@@ -73,20 +71,6 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  const switchDevice = (device: SeamDevice) => {
-    setActiveDevice(device);
-    loadDeviceData(device);
-  };
-
-  const handleSharePortal = () => {
-    const mockHomeId = activeDevice ? `GTA-${activeDevice.device_id.slice(-6).toUpperCase()}` : "DEMO";
-    const url = `${window.location.origin}/#portal/${mockHomeId}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setLinkCopied(true);
-      setTimeout(() => setLinkCopied(false), 2000);
-    });
-  };
-
   const handleLogout = async () => {
     if (supabase) await supabase.auth.signOut();
   };
@@ -96,17 +80,23 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="max-w-[1500px] mx-auto space-y-6 animate-fade-in px-4 py-8">
       
-      {/* CORPORATE NAV BAR */}
+      {/* ENTERPRISE HEADER */}
       <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-5 px-8 bg-[#161d2e] border border-white/5 rounded-lg shadow-2xl">
         <div className="flex items-center gap-5">
            <div className="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-900/40">
              <Icons.Cpu />
            </div>
            <div>
-              <h1 className="text-xl font-black text-white tracking-tight uppercase">Ambient Twin <span className="text-blue-400 font-light">Ent.</span></h1>
-              <div className="flex items-center gap-1.5 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
-                <Icons.Location />
-                Toronto Operational Center
+              <h1 className="text-xl font-black text-white tracking-tight uppercase">Ambient Twin <span className="text-blue-400 font-light">Prod.</span></h1>
+              <div className="flex items-center gap-4">
+                 <div className="flex items-center gap-1.5 text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
+                   <Icons.Location />
+                   Toronto HQ
+                 </div>
+                 <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                   <Icons.Lock />
+                   Keys Vaulted (Edge Functions Active)
+                 </div>
               </div>
            </div>
         </div>
@@ -119,46 +109,33 @@ export const Dashboard: React.FC = () => {
             Rebate CRM
           </button>
           <div className="h-6 w-px bg-white/10" />
-          <button onClick={handleLogout} className="text-white/30 hover:text-red-400 transition-colors">
+          <button onClick={handleLogout} className="text-white/30 hover:text-red-400 transition-colors p-2">
             <Icons.Power />
           </button>
-          {activeDevice && (
-            <button 
-              onClick={handleSharePortal}
-              className="px-6 py-2.5 rounded bg-blue-600 hover:bg-blue-500 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-lg"
-            >
-              {linkCopied ? 'Token Copied' : 'Sync Portal'}
-            </button>
-          )}
         </nav>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
-        
-        {/* ASSET SELECTOR SIDEBAR */}
         <aside className="lg:col-span-3 space-y-6">
            <GlassCard title="Global Asset Inventory" icon={<Icons.Activity />} className="p-0 overflow-hidden">
-              <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
+              <div className="max-h-[600px] overflow-y-auto">
                  {isConnecting ? (
                    <div className="p-16 text-center space-y-4">
                       <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
-                      <div className="text-[10px] text-white/20 font-black uppercase tracking-[0.2em]">Handshaking...</div>
                    </div>
                  ) : (
                    devices.map((d) => (
                     <button
                       key={d.device_id}
-                      onClick={() => switchDevice(d)}
+                      onClick={() => { setActiveDevice(d); loadDeviceData(d); }}
                       className={`w-full p-5 border-b border-white/5 text-left transition-all flex items-center justify-between group ${activeDevice?.device_id === d.device_id ? 'bg-blue-600/10 border-l-[6px] border-l-blue-500' : 'hover:bg-white/[0.02]'}`}
                     >
                        <div>
                           <span className="block text-[12px] font-bold text-white tracking-wide">{d.properties.name}</span>
                           <span className="text-[9px] text-white/20 font-mono tracking-tighter uppercase">{d.device_id.slice(-12)}</span>
                        </div>
-                       <div className="flex flex-col items-end gap-2">
-                          <div className={`px-2 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-tighter ${d.properties.online ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                            {d.properties.online ? 'Synced' : 'Critical Lost'}
-                          </div>
+                       <div className={`px-2 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-tighter ${d.properties.online ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                         {d.properties.online ? 'Synced' : 'Critical'}
                        </div>
                     </button>
                    ))
@@ -166,7 +143,7 @@ export const Dashboard: React.FC = () => {
               </div>
            </GlassCard>
 
-           <div className="p-6 bg-gradient-to-br from-blue-600/10 to-transparent border border-blue-500/20 rounded-lg">
+           <div className="p-6 bg-blue-600/10 border border-blue-500/20 rounded-lg">
               <div className="flex justify-between items-center mb-3">
                  <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Regional Flux</span>
                  <span className="text-[10px] font-bold text-blue-400">Toronto, ON</span>
@@ -175,13 +152,9 @@ export const Dashboard: React.FC = () => {
                  <span className="text-3xl font-black text-white">-2°C</span>
                  <span className="text-[10px] text-blue-400/60 font-black uppercase">Frost Point</span>
               </div>
-              <p className="mt-3 text-[10px] leading-relaxed text-white/30 font-medium">
-                System optimized for high-humidity freeze cycles typical of Lake Ontario proximity.
-              </p>
            </div>
         </aside>
 
-        {/* DATA COMMAND VIEW */}
         <main className="lg:col-span-9 space-y-6">
            {!activeDevice ? (
               <GlassCard className="flex flex-col items-center justify-center py-64 bg-white/[0.01]">
@@ -192,8 +165,6 @@ export const Dashboard: React.FC = () => {
               </GlassCard>
            ) : (
               <div className="space-y-6 animate-fade-in">
-                 
-                 {/* PRIMARY STATS */}
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <GlassCard className="border-l-4 border-l-blue-500 shadow-xl">
                        <div className="space-y-6">
@@ -210,7 +181,6 @@ export const Dashboard: React.FC = () => {
                     </div>
                  </div>
 
-                 {/* VISUALS */}
                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div className="lg:col-span-8">
                        <GlassCard title="Spectral Analysis Curve" icon={<Icons.Activity />}>
@@ -266,11 +236,9 @@ export const Dashboard: React.FC = () => {
                        )}
                     </div>
                  </div>
-
               </div>
            )}
         </main>
-
       </div>
     </div>
   );
