@@ -6,7 +6,7 @@ interface GlassCardProps {
   className?: string;
   title?: string;
   icon?: React.ReactNode;
-  variant?: 'default' | 'premium' | 'danger';
+  variant?: 'default' | 'premium' | 'danger' | 'mica';
 }
 
 export const GlassCard: React.FC<GlassCardProps> = ({ children, className = '', title, icon, variant = 'default' }) => {
@@ -22,9 +22,10 @@ export const GlassCard: React.FC<GlassCardProps> = ({ children, className = '', 
   };
 
   const variantStyles = {
-    default: 'border-white/10 hover:border-white/20',
-    premium: 'border-orange-500/30 hover:border-orange-500/50 bg-orange-500/[0.02]',
-    danger: 'border-red-500/30 hover:border-red-500/50 bg-red-500/[0.02]',
+    default: 'border-white/5 bg-white/[0.02]',
+    premium: 'border-orange-500/20 bg-orange-500/[0.01]',
+    danger: 'border-red-500/20 bg-red-500/[0.01]',
+    mica: 'border-white/10 bg-white/[0.04] backdrop-blur-3xl shadow-2xl',
   };
 
   return (
@@ -33,37 +34,36 @@ export const GlassCard: React.FC<GlassCardProps> = ({ children, className = '', 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`
-        relative overflow-hidden rounded-xl
-        bg-[#0f172a]/40 backdrop-blur-2xl 
-        border transition-all duration-500 ease-out
-        shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]
-        ${variantStyles[variant]}
+        relative overflow-hidden rounded-lg
+        border transition-all duration-300 ease-in-out
+        ${variantStyles[variant === 'mica' ? 'mica' : variant]}
         ${className}
       `}
     >
-      {/* Interactive Spotlight Effect */}
+      {/* Dynamic Glow Layer */}
       <div 
-        className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-300"
+        className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500"
         style={{
           opacity: isHovered ? 1 : 0,
-          background: `radial-gradient(600px circle at ${coords.x}px ${coords.y}px, rgba(249, 115, 22, 0.1), transparent 40%)`
+          background: `radial-gradient(400px circle at ${coords.x}px ${coords.y}px, rgba(255, 255, 255, 0.05), transparent 60%)`
         }}
       />
       
-      {/* Structural accent line */}
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
+      {/* Header Bar */}
       {(title || icon) && (
-        <div className="flex items-center justify-between p-5 border-b border-white/5 bg-white/[0.01]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            {icon && <span className="text-orange-500 filter drop-shadow-[0_0_8px_rgba(249,115,22,0.4)]">{icon}</span>}
-            {title && <h3 className="text-sm font-bold text-white uppercase tracking-[0.15em]">{title}</h3>}
+            {icon && <span className="text-white/60">{icon}</span>}
+            {title && <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-[0.15em]">{title}</h3>}
           </div>
-          <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
+          <div className="flex gap-1">
+             <div className="w-1 h-1 rounded-full bg-white/20" />
+             <div className="w-1 h-1 rounded-full bg-white/10" />
+          </div>
         </div>
       )}
       
-      <div className="p-6">
+      <div className="p-5">
         {children}
       </div>
     </div>

@@ -3,18 +3,19 @@ import { GoogleGenAI } from "@google/genai";
 import { TelemetryReading, SeamDevice } from "../types";
 
 export class GeminiService {
-  private ai: GoogleGenAI;
-
-  constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-  }
-
+  /**
+   * Analyzes HVAC system health using Gemini AI.
+   * Following guidelines: Initialize GoogleGenAI right before the API call using process.env.API_KEY directly.
+   */
   public async analyzeSystemHealth(device: SeamDevice, readings: TelemetryReading[]): Promise<string> {
     if (!process.env.API_KEY) {
       return "AI Insight Unavailable: Please configure your API_KEY in the environment settings.";
     }
 
     try {
+      // Create a new GoogleGenAI instance right before making the API call as per guidelines
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      
       const latest = readings[readings.length - 1];
       const avgTemp = readings.reduce((acc, r) => acc + r.indoorTemp, 0) / readings.length;
       
@@ -37,11 +38,13 @@ export class GeminiService {
         Formatting: Plain text, professional, direct.
       `;
 
-      const response = await this.ai.models.generateContent({
+      // Use ai.models.generateContent with model and prompt as per guidelines
+      const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: prompt,
       });
 
+      // Using .text property directly as per guidelines (not a method call)
       return response.text || "Diagnostic calibration failure.";
     } catch (error) {
       console.error("Gemini Error:", error);
