@@ -246,8 +246,8 @@ export const Dashboard: React.FC = () => {
 
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                       <div className="lg:col-span-8">
-                        <GlassCard title="Mechanical Performance Curve" icon={<Icons.Activity />} className="border-2">
-                            <p className="text-[13px] text-white font-black uppercase tracking-widest mb-6">Real-Time Integrity Monitoring (Technical Proof)</p>
+                        <GlassCard title="System Performance History" icon={<Icons.Activity />} className="border-2">
+                            <p className="text-[13px] text-white font-black uppercase tracking-widest mb-6">24-Hour Efficiency & Comfort Audit</p>
                             <HeartbeatGraph data={readings} />
                         </GlassCard>
                       </div>
