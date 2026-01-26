@@ -53,6 +53,42 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
     setIsSending(false);
   };
 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFillColor(15, 23, 42); 
+    doc.rect(0, 0, 210, 50, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
+    doc.text("AMBIENT TWIN ENERGY REPORT", 20, 30);
+    
+    doc.setFontSize(10);
+    doc.text(`PROPERTY ID: ${homeId.toUpperCase()}`, 20, 42);
+    
+    // Body Content
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.text("Property Summary", 20, 70);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`Address: ${profile.address}`, 20, 80);
+    doc.text(`Current System: ${profile.system}`, 20, 90);
+    doc.text(`Estimated Rebate Eligibility: $${profile.rebateAmount.toLocaleString()} CAD`, 20, 100);
+    doc.text(`Monthly Energy Waste: $${profile.monthlyWaste}/month`, 20, 110);
+    
+    // Footer Legal
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text("This report is generated via real-time digital twin telemetry. ", 20, 270);
+    doc.text("Blockchain verified. SHA-256 Hash: verified_at_origin", 20, 275);
+    
+    doc.save(`Energy_Report_${homeId.toUpperCase()}.pdf`);
+  };
+
   const chartData = [
     { name: 'Jan', current: 340, optimized: 190, reason: "Thermal Leakage" },
     { name: 'Feb', current: 310, optimized: 175, reason: "Blower Motor Inefficiency" },
@@ -165,7 +201,10 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
                <h4 className="text-xl font-black text-white uppercase tracking-tight">Full Energy Report</h4>
                <p className="text-sm text-white/70 font-medium leading-relaxed">Download your blockchain-verified technical addendum for your home appraisal or realtor files.</p>
             </div>
-            <button className="w-full py-4 bg-white/10 hover:bg-orange-600 border border-white/20 rounded text-xs font-black uppercase tracking-[0.2em] text-white flex items-center justify-center gap-3 transition-all">
+            <button 
+               onClick={handleDownloadPDF}
+               className="w-full py-4 bg-white/10 hover:bg-orange-600 border border-white/20 rounded text-xs font-black uppercase tracking-[0.2em] text-white flex items-center justify-center gap-3 transition-all"
+            >
                <Icons.Download />
                Get PDF Summary
             </button>

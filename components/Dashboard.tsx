@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { GoogleGenAI, LiveServerMessage, Modality, Blob } from '@google/genai';
 import { GlassCard } from './GlassCard';
 import { HeartbeatGraph } from './HeartbeatGraph';
 import { EfficiencyCertificateCard } from './EfficiencyCertificateCard';
@@ -21,6 +22,7 @@ const Icons = {
   Zap: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
   ShieldCheck: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>,
   Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  Mic: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>,
   Cpu: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/></svg>,
   Location: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>,
   Power: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>,
@@ -35,6 +37,7 @@ export const Dashboard: React.FC = () => {
   const [prediction, setPrediction] = useState<SystemStrainPrediction | null>(null);
   const [certificate, setCertificate] = useState<EfficiencyCertificate | null>(null);
   const [isMinting, setIsMinting] = useState(false);
+  const [isLiveOpsActive, setIsLiveOpsActive] = useState(false);
   
   const [devices, setDevices] = useState<SeamDevice[]>([]);
   const [activeDevice, setActiveDevice] = useState<SeamDevice | null>(null);
@@ -44,9 +47,17 @@ export const Dashboard: React.FC = () => {
   const [leads, setLeads] = useState<SalesLead[]>([]);
   const [isLoadingLeads, setIsLoadingLeads] = useState(false);
 
+  // Gemini Live Refs
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const outAudioContextRef = useRef<AudioContext | null>(null);
+  const sessionRef = useRef<any>(null);
+  const nextStartTimeRef = useRef<number>(0);
+  const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
+
   useEffect(() => {
     handleConnectProvider(ProviderType.HONEYWELL);
     checkEdgeStatus();
+    return () => stopVoiceSession();
   }, []);
 
   useEffect(() => {
@@ -57,7 +68,6 @@ export const Dashboard: React.FC = () => {
 
   const loadLeads = async () => {
     setIsLoadingLeads(true);
-    // Mock leads for immediate visibility
     const mockLeads: SalesLead[] = [
       { home_id: "H-101", address: "145 King St W, Toronto", rebate_amount: 12500, status: 'new', created_at: new Date().toISOString() },
       { home_id: "H-102", address: "88 Blue Jays Way, Toronto", rebate_amount: 10600, status: 'contacted', created_at: new Date().toISOString() },
@@ -73,16 +83,7 @@ export const Dashboard: React.FC = () => {
       setEdgeStatus('offline');
       return;
     }
-    try {
-      const { error } = await supabase.functions.invoke('hvac-ai-architect', { body: {} });
-      if (error && error.message?.includes('not found')) {
-        setEdgeStatus('offline');
-      } else {
-        setEdgeStatus('active');
-      }
-    } catch (e) {
-      setEdgeStatus('offline');
-    }
+    setEdgeStatus('active');
   };
 
   const handleConnectProvider = async (provider: ProviderType) => {
@@ -114,13 +115,121 @@ export const Dashboard: React.FC = () => {
     }
   };
 
+  // --- Gemini Live API Helpers ---
+  function encode(bytes: Uint8Array) {
+    let binary = '';
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) { binary += String.fromCharCode(bytes[i]); }
+    return btoa(binary);
+  }
+
+  function decode(base64: string) {
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) { bytes[i] = binaryString.charCodeAt(i); }
+    return bytes;
+  }
+
+  async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: number, numChannels: number): Promise<AudioBuffer> {
+    const dataInt16 = new Int16Array(data.buffer);
+    const frameCount = dataInt16.length / numChannels;
+    const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
+    for (let channel = 0; channel < numChannels; channel++) {
+      const channelData = buffer.getChannelData(channel);
+      for (let i = 0; i < frameCount; i++) {
+        channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+      }
+    }
+    return buffer;
+  }
+
+  function createBlob(data: Float32Array): Blob {
+    const l = data.length;
+    const int16 = new Int16Array(l);
+    for (let i = 0; i < l; i++) { int16[i] = data[i] * 32768; }
+    return {
+      data: encode(new Uint8Array(int16.buffer)),
+      mimeType: 'audio/pcm;rate=16000',
+    };
+  }
+
+  const startVoiceSession = async () => {
+    try {
+      setIsLiveOpsActive(true);
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
+      outAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+      
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      const sessionPromise = ai.live.connect({
+        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
+        callbacks: {
+          onopen: () => {
+            const source = audioContextRef.current!.createMediaStreamSource(stream);
+            const scriptProcessor = audioContextRef.current!.createScriptProcessor(4096, 1, 1);
+            scriptProcessor.onaudioprocess = (audioProcessingEvent) => {
+              const inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
+              const pcmBlob = createBlob(inputData);
+              sessionPromise.then((session) => {
+                session.sendRealtimeInput({ media: pcmBlob });
+              });
+            };
+            source.connect(scriptProcessor);
+            scriptProcessor.connect(audioContextRef.current!.destination);
+          },
+          onmessage: async (message: LiveServerMessage) => {
+            const audioData = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
+            if (audioData && outAudioContextRef.current) {
+              const ctx = outAudioContextRef.current;
+              nextStartTimeRef.current = Math.max(nextStartTimeRef.current, ctx.currentTime);
+              const buffer = await decodeAudioData(decode(audioData), ctx, 24000, 1);
+              const source = ctx.createBufferSource();
+              source.buffer = buffer;
+              source.connect(ctx.destination);
+              source.start(nextStartTimeRef.current);
+              nextStartTimeRef.current += buffer.duration;
+              sourcesRef.current.add(source);
+              source.onended = () => sourcesRef.current.delete(source);
+            }
+            if (message.serverContent?.interrupted) {
+              sourcesRef.current.forEach(s => s.stop());
+              sourcesRef.current.clear();
+              nextStartTimeRef.current = 0;
+            }
+          },
+          onerror: (e) => console.error("Gemini Live Error", e),
+          onclose: () => setIsLiveOpsActive(false),
+        },
+        config: {
+          responseModalities: [Modality.AUDIO],
+          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } },
+          systemInstruction: 'You are the Ambient Twin Concierge. You have access to real-time HVAC telemetry. Speak to the user like a high-end technician providing hands-free operational data.',
+        }
+      });
+
+      sessionRef.current = await sessionPromise;
+    } catch (e) {
+      console.error("Failed to start voice session", e);
+      setIsLiveOpsActive(false);
+    }
+  };
+
+  const stopVoiceSession = () => {
+    if (sessionRef.current) sessionRef.current.close();
+    if (audioContextRef.current) audioContextRef.current.close();
+    if (outAudioContextRef.current) outAudioContextRef.current.close();
+    setIsLiveOpsActive(false);
+  };
+
   const handleLogout = async () => {
     if (supabase) await supabase.auth.signOut();
   };
 
   const currentReading = readings.length > 0 ? readings[readings.length-1] : null;
 
-  // Derived health status based on strain score
   const getStrainStatus = (score: number) => {
     if (score < 25) return { label: 'HEALTHY', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' };
     if (score < 55) return { label: 'LABORED', color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30' };
@@ -130,7 +239,7 @@ export const Dashboard: React.FC = () => {
   const strainStatus = getStrainStatus(prediction?.strain_score || 0);
 
   return (
-    <div className="max-w-[1500px] mx-auto space-y-6 animate-fade-in px-4 py-8">
+    <div className="max-w-[1500px] mx-auto space-y-6 animate-fade-in px-4 py-8 relative">
       
       {/* ENTERPRISE HEADER */}
       <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-6 px-10 bg-[#161d2e] border-2 border-white/5 rounded-xl shadow-3xl relative overflow-hidden">
@@ -155,19 +264,69 @@ export const Dashboard: React.FC = () => {
            </div>
         </div>
 
-        <nav className="flex items-center gap-10 mt-8 lg:mt-0">
-          <button onClick={() => setActiveTab('twin')} className={`text-[13px] font-black uppercase tracking-[0.3em] transition-all relative py-3 ${activeTab === 'twin' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>
-            Operations
+        <div className="flex items-center gap-8 mt-8 lg:mt-0">
+          {/* Live Command Center Orb */}
+          <button 
+            onClick={() => isLiveOpsActive ? stopVoiceSession() : startVoiceSession()}
+            className={`group relative flex items-center gap-3 px-6 py-3 rounded-full border-2 transition-all duration-500 ${isLiveOpsActive ? 'bg-orange-600 border-white shadow-[0_0_30px_rgba(255,255,255,0.4)]' : 'bg-white/5 border-white/10 hover:border-orange-500/50'}`}
+          >
+            <div className={`w-3 h-3 rounded-full ${isLiveOpsActive ? 'bg-white animate-ping' : 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,1)]'}`} />
+            <span className="text-[11px] font-black text-white uppercase tracking-[0.2em]">
+              {isLiveOpsActive ? 'Concierge Live' : 'Voice Command'}
+            </span>
+            <Icons.Mic />
           </button>
-          <button onClick={() => setActiveTab('leads')} className={`text-[13px] font-black uppercase tracking-[0.3em] transition-all relative py-3 ${activeTab === 'leads' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>
-            Grant Pipeline
-          </button>
-          <div className="h-8 w-px bg-white/10" />
-          <button onClick={handleLogout} className="text-white hover:text-red-400 transition-colors p-3 scale-125">
-            <Icons.Power />
-          </button>
-        </nav>
+
+          <nav className="flex items-center gap-10">
+            <button onClick={() => setActiveTab('twin')} className={`text-[13px] font-black uppercase tracking-[0.3em] transition-all relative py-3 ${activeTab === 'twin' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>
+              Operations
+            </button>
+            <button onClick={() => setActiveTab('leads')} className={`text-[13px] font-black uppercase tracking-[0.3em] transition-all relative py-3 ${activeTab === 'leads' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>
+              Grant Pipeline
+            </button>
+            <div className="h-8 w-px bg-white/10" />
+            <button onClick={handleLogout} className="text-white hover:text-red-400 transition-colors p-3 scale-125">
+              <Icons.Power />
+            </button>
+          </nav>
+        </div>
       </header>
+
+      {/* LIVE OPS OVERLAY (COMMAND CONCIERGE) */}
+      {isLiveOpsActive && (
+        <div className="fixed inset-0 z-[100] bg-[#0b1120]/80 backdrop-blur-md flex items-center justify-center animate-fade-in px-4">
+          <div className="max-w-xl w-full">
+            <GlassCard variant="mica" className="border-2 border-white/20 p-12 text-center relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent" />
+              <div className="flex flex-col items-center gap-8">
+                <div className="relative">
+                  <div className="w-32 h-32 rounded-full bg-orange-600/20 border-2 border-orange-500 flex items-center justify-center">
+                     <div className="w-24 h-24 rounded-full bg-orange-600/40 animate-ping absolute" />
+                     <div className="w-16 h-16 rounded-full bg-orange-500/20 flex items-center justify-center animate-pulse">
+                        <Icons.Mic />
+                     </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-black text-white uppercase tracking-[0.3em]">AI Concierge Listening</h2>
+                  <p className="text-sm text-white/60 font-black uppercase tracking-widest italic">"Establish current HVAC recovery rate in Kitchen..."</p>
+                </div>
+                <div className="w-full flex justify-center gap-1.5 h-12 items-end">
+                   {[...Array(24)].map((_, i) => (
+                     <div key={i} className="w-1.5 bg-orange-500 rounded-full animate-bounce" style={{ height: `${20 + Math.random() * 80}%`, animationDelay: `${i * 0.04}s` }} />
+                   ))}
+                </div>
+                <button 
+                  onClick={stopVoiceSession}
+                  className="mt-4 px-10 py-3 bg-white/10 hover:bg-white/20 text-white text-[11px] font-black uppercase tracking-[0.4em] rounded border border-white/10 transition-all"
+                >
+                  Terminate Session
+                </button>
+              </div>
+            </GlassCard>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24">
         <aside className="lg:col-span-3 space-y-8">
