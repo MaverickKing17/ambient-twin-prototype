@@ -225,7 +225,7 @@ export const Dashboard: React.FC = () => {
                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div className="lg:col-span-8">
                        <GlassCard title="Mechanical Activity Curve" icon={<Icons.Activity />}>
-                          <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mb-4">Real-Time Heat Exchanger Performance</p>
+                          <p className="text-[10px] text-white font-bold uppercase tracking-widest mb-4">Real-Time Heat Exchanger Performance</p>
                           <HeartbeatGraph data={readings} />
                        </GlassCard>
                     </div>
@@ -234,7 +234,7 @@ export const Dashboard: React.FC = () => {
                           <div className="space-y-6">
                              <div className="flex flex-col mb-4">
                                <span className="text-[14px] font-black text-white uppercase tracking-[0.2em]">Asset Stress Level</span>
-                               <p className="text-[10px] text-white/50 font-bold uppercase tracking-tighter mt-1.5">Mechanical Load Probability Index</p>
+                               <p className="text-[10px] text-white font-bold uppercase tracking-tighter mt-1.5">Mechanical Load Probability Index</p>
                              </div>
                              <div className="flex justify-between items-end">
                                 <span className={`text-4xl font-black tracking-tighter ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-orange-500' : 'text-emerald-400'}`}>
@@ -262,9 +262,9 @@ export const Dashboard: React.FC = () => {
                              <div className="space-y-5">
                                 <div className="flex flex-col">
                                   <span className="text-base font-black text-white uppercase tracking-[0.2em]">Efficiency Ledger Seal</span>
-                                  <p className="text-[12px] text-white/50 font-bold uppercase tracking-wider mt-2">For 2026 Rebate Submission</p>
+                                  <p className="text-[12px] text-white font-bold uppercase tracking-wider mt-2">For 2026 Rebate Submission</p>
                                 </div>
-                                <p className="text-[12px] text-white leading-relaxed uppercase font-black tracking-[0.1em] opacity-80">
+                                <p className="text-[12px] text-white leading-relaxed uppercase font-black tracking-[0.1em]">
                                   Finalize immutable efficiency hash for 2026 rebate submission.
                                 </p>
                                 <button 

@@ -61,7 +61,7 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
           <div className="flex flex-col">
             <span className="text-[10px] uppercase font-black tracking-[0.4em] text-orange-500 mb-1">Asset Appraisal Tool</span>
             <h3 className="text-2xl font-black text-white tracking-tighter uppercase leading-none">Efficiency Ledger</h3>
-            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-2">Certified for Realtor & Lender Review</p>
+            <p className="text-[10px] text-white/90 font-bold uppercase tracking-widest mt-2">Certified for Realtor & Lender Review</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-800/40 border border-orange-500/30 flex items-center justify-center shadow-lg">
              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
@@ -103,7 +103,7 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
            </div>
            
            <div className="px-4 py-2 rounded bg-orange-500/5 border border-dashed border-orange-500/20 text-center">
-              <span className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em]">MLS Guidance: Include Score in 'Green Features' Listing</span>
+              <span className="text-[9px] font-black text-white uppercase tracking-[0.2em]">MLS Guidance: Include Score in 'Green Features' Listing</span>
            </div>
         </div>
 
@@ -126,12 +126,12 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
         {/* Metrics Grid */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="bg-white/[0.02] rounded-lg border border-white/5 p-4 flex flex-col items-center">
-            <span className="text-[9px] text-white/40 uppercase tracking-[0.2em] font-black mb-1">Cooling Performance</span>
+            <span className="text-[9px] text-white/90 uppercase tracking-[0.2em] font-black mb-1">Cooling Performance</span>
             <span className="text-2xl font-black text-white">{certificate.metrics.seer2}</span>
             <span className="text-[10px] text-orange-400 font-bold uppercase mt-1">SEER2 Rating</span>
           </div>
           <div className="bg-white/[0.02] rounded-lg border border-white/5 p-4 flex flex-col items-center">
-            <span className="text-[9px] text-white/40 uppercase tracking-[0.2em] font-black mb-1">Heating Efficiency</span>
+            <span className="text-[9px] text-white/90 uppercase tracking-[0.2em] font-black mb-1">Heating Efficiency</span>
             <span className="text-2xl font-black text-white">{certificate.metrics.hspf2}</span>
             <span className="text-[10px] text-orange-400 font-bold uppercase mt-1">HSPF2 Rating</span>
           </div>
@@ -140,8 +140,8 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
         {/* Footer Actions */}
         <div className="space-y-4 border-t border-white/5 pt-6">
           <div className="flex justify-between items-center font-mono">
-            <span className="text-[9px] tracking-widest text-white/20 font-black uppercase">Asset ID: {certificate.id}</span>
-            <span className="text-[9px] text-white/40 font-bold">{formattedDate}</span>
+            <span className="text-[9px] tracking-widest text-white/60 font-black uppercase">Asset ID: {certificate.id}</span>
+            <span className="text-[9px] text-white/80 font-bold">{formattedDate}</span>
           </div>
 
           <div className="flex items-center justify-between gap-3">
