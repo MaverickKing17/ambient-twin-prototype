@@ -34,28 +34,28 @@ export const PublicVerificationPage: React.FC<Props> = ({ hash }) => {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-10 animate-fade-in pb-32">
       <header className="flex flex-col items-center text-center space-y-8 mb-20 pt-10">
-        <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black tracking-[0.4em] uppercase shadow-lg shadow-blue-900/10">
+        <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-black tracking-[0.4em] uppercase shadow-lg shadow-orange-900/10">
           <Icons.Vault />
           Secure Trust Gateway
         </div>
         <h1 className="text-6xl font-black text-white tracking-tighter leading-none uppercase">Asset Authenticator</h1>
-        <p className="text-slate-400 max-w-2xl text-lg font-medium leading-relaxed">
-          Access the <span className="text-white">blockchain-anchored</span> efficiency certificate for this property's high-performance HVAC infrastructure.
+        <p className="text-white/80 max-w-2xl text-xl font-semibold leading-relaxed">
+          Access the <span className="text-orange-500 underline decoration-2 underline-offset-8">blockchain-anchored</span> efficiency certificate for this property's high-performance HVAC infrastructure.
         </p>
       </header>
 
       {isVerifying ? (
         <div className="flex flex-col items-center py-24 space-y-6">
-           <div className="w-16 h-16 border-4 border-blue-500/10 border-t-orange-500 rounded-full animate-spin shadow-[0_0_40px_rgba(249,115,22,0.2)]"></div>
-           <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.5em]">Establishing Proof of Origin...</span>
+           <div className="w-16 h-16 border-4 border-white/5 border-t-orange-500 rounded-full animate-spin shadow-[0_0_50px_rgba(249,115,22,0.4)]"></div>
+           <span className="text-[10px] font-black text-white uppercase tracking-[0.5em]">Establishing Proof of Origin...</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           
           <div className="lg:col-span-7 space-y-8">
-            <GlassCard variant="mica" className="border-l-4 border-l-orange-500 shadow-2xl bg-white/[0.01]">
+            <GlassCard variant="mica" className="border-l-4 border-l-orange-500 shadow-2xl bg-white/[0.02]">
               <div className="flex items-center gap-4 mb-12">
-                <div className="p-4 bg-orange-500/10 rounded-xl text-orange-500 shadow-lg shadow-orange-900/10">
+                <div className="p-4 bg-orange-500 text-white rounded-xl shadow-lg shadow-orange-900/40">
                   <Icons.Home />
                 </div>
                 <div>
@@ -70,74 +70,67 @@ export const PublicVerificationPage: React.FC<Props> = ({ hash }) => {
               <div className="space-y-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div>
-                    <label className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black mb-3 block">Property Registry</label>
+                    <label className="text-[10px] text-orange-400 uppercase tracking-[0.3em] font-black mb-3 block">Property Registry</label>
                     <div className="text-2xl text-white font-black leading-tight tracking-tight uppercase">{mockPublicData.address}</div>
                   </div>
                   <div>
-                    <label className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black mb-3 block">Digital Twin ID</label>
-                    <div className="text-xl text-orange-400 font-mono font-black tracking-tighter uppercase">{mockPublicData.serialNumber}</div>
+                    <label className="text-[10px] text-orange-400 uppercase tracking-[0.3em] font-black mb-3 block">Digital Twin ID</label>
+                    <div className="text-xl text-white font-mono font-black tracking-tighter uppercase">{mockPublicData.serialNumber}</div>
                   </div>
                 </div>
 
                 <div className="pt-10 border-t border-white/10">
-                  <label className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black mb-4 block">Asset Signature (SHA-256)</label>
-                  <div className="bg-black/60 p-6 rounded-lg border border-white/5 font-mono text-[11px] text-slate-500 break-all leading-relaxed shadow-inner">
+                  <label className="text-[10px] text-orange-400 uppercase tracking-[0.3em] font-black mb-4 block">Asset Signature (SHA-256)</label>
+                  <div className="bg-black/60 p-6 rounded-lg border border-white/10 font-mono text-[11px] text-white/70 break-all leading-relaxed shadow-inner">
                     {hash}
                   </div>
                 </div>
               </div>
             </GlassCard>
 
-            <div className="bg-emerald-500/10 border border-emerald-500/20 p-10 rounded-xl flex items-center gap-8 shadow-2xl relative overflow-hidden group">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 p-10 rounded-xl flex items-center gap-8 shadow-2xl relative overflow-hidden group">
                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                <div className="h-16 w-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-emerald-500/40 shrink-0 transform group-hover:rotate-6 transition-transform">
                   <Icons.Verified />
                </div>
                <div>
                   <h4 className="text-2xl font-black text-white mb-1 uppercase tracking-tight">Rebate Eligibility Certified</h4>
-                  <p className="text-base text-slate-400">Confirmed for <span className="text-emerald-400 font-black tracking-tight">{mockPublicData.rebateAmount} CAD</span> via Enbridge HER+.</p>
+                  <p className="text-lg text-white/80">Confirmed for <span className="text-emerald-400 font-black tracking-tight">{mockPublicData.rebateAmount} CAD</span> via Enbridge HER+.</p>
                </div>
             </div>
           </div>
 
           <div className="lg:col-span-5 space-y-8">
             <GlassCard title="Real-Time Performance" icon={<Icons.Activity />} variant="mica" className="relative">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/10 blur-[60px] pointer-events-none" />
+               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/20 blur-[60px] pointer-events-none" />
                <div className="space-y-12 py-6">
                   <div className="flex justify-between items-center py-5 border-b border-white/10">
-                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em]">Operational Health</span>
+                    <span className="text-[11px] font-black text-white uppercase tracking-[0.3em]">Operational Health</span>
                     <span className="px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-700 text-white text-[10px] font-black uppercase rounded shadow-xl shadow-orange-900/40 tracking-[0.2em] animate-pulse">
                       {mockPublicData.status}
                     </span>
                   </div>
 
                   <div className="text-center py-10 relative">
-                    <div className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] mb-6">Efficiency Performance Rating</div>
+                    <div className="text-[11px] font-black text-white uppercase tracking-[0.4em] mb-6">Efficiency Performance Rating</div>
                     <div className="relative inline-block">
-                      <div className="text-[140px] leading-none font-black text-transparent bg-clip-text bg-gradient-to-b from-orange-400 to-orange-700 tracking-tighter filter drop-shadow-[0_20px_40px_rgba(249,115,22,0.4)]">
+                      <div className="text-[140px] leading-none font-black text-transparent bg-clip-text bg-gradient-to-b from-orange-400 to-orange-700 tracking-tighter filter drop-shadow-[0_20px_40px_rgba(249,115,22,0.6)]">
                         {mockPublicData.systemGrade}
                       </div>
                     </div>
-                    <div className="text-[11px] font-black text-orange-400/80 mt-10 tracking-[0.4em] uppercase border-y border-orange-500/20 py-2 inline-block">
+                    <div className="text-[11px] font-black text-orange-400 mt-10 tracking-[0.4em] uppercase border-y border-orange-500/30 py-2 inline-block">
                       Peak Optimization Curve
                     </div>
                   </div>
 
-                  <div className="bg-white/[0.04] p-6 rounded-xl border border-white/5 text-center shadow-inner">
-                     <p className="text-[11px] text-slate-400 leading-relaxed font-bold uppercase tracking-wider">
+                  <div className="bg-white/[0.08] p-6 rounded-xl border border-white/10 text-center shadow-inner">
+                     <p className="text-[11px] text-white leading-relaxed font-black uppercase tracking-wider">
                        Telemetry streamed via Secure MQTT.<br/>
-                       <span className="text-orange-500/70">Next cryptographic update: 42s</span>
+                       <span className="text-orange-400">Next cryptographic update: 42s</span>
                      </p>
                   </div>
                </div>
             </GlassCard>
-            
-            <button 
-              onClick={() => window.location.hash = ''}
-              className="w-full py-5 text-[10px] font-black text-slate-500 hover:text-white transition-all uppercase tracking-[0.5em] text-center border border-white/5 hover:border-white/10 rounded-xl bg-white/[0.02]"
-            >
-              &larr; Exit Secure Tunnel
-            </button>
           </div>
 
         </div>
