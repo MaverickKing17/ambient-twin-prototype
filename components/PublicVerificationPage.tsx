@@ -112,9 +112,12 @@ export const PublicVerificationPage: React.FC<Props> = ({ hash }) => {
       </div>
 
       <div className="text-center pt-8 border-t border-white/10">
-        <a href="#" className="text-sm text-white/50 hover:text-white transition-colors font-medium">
+        <button 
+          onClick={() => window.location.hash = ''}
+          className="text-sm text-white/50 hover:text-white transition-colors font-medium cursor-pointer bg-transparent border-none p-0"
+        >
           &larr; Return to Main Application
-        </a>
+        </button>
       </div>
     </div>
   );

@@ -186,12 +186,12 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
               <span className="text-xs text-white/70 ml-1 font-medium">Homeowner View</span>
               {certificate.isPublished ? (
                 <div className="flex items-center gap-2">
-                  <a 
-                    href={`#verify/${certificate.assetHash}`}
-                    className="text-xs text-orange-400 hover:text-orange-300 underline underline-offset-2 transition-colors font-semibold"
+                  <button 
+                    onClick={() => window.location.hash = `verify/${certificate.assetHash}`}
+                    className="text-xs text-orange-400 hover:text-orange-300 underline underline-offset-2 transition-colors font-semibold cursor-pointer bg-transparent border-none p-0"
                   >
                     View Public URL
-                  </a>
+                  </button>
                   <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)] animate-pulse"></div>
                 </div>
               ) : (
