@@ -131,6 +131,14 @@ export const PublicVerificationPage: React.FC<Props> = ({ hash }) => {
                   </div>
                </div>
             </GlassCard>
+            
+            {/* NEW HIGH-CONTRAST EXIT BUTTON */}
+            <button 
+              onClick={() => window.location.hash = ''}
+              className="w-full py-5 text-[12px] font-black text-white hover:text-orange-100 transition-all uppercase tracking-[0.5em] text-center border border-orange-500/40 hover:border-orange-500 rounded-xl bg-orange-600 shadow-xl shadow-orange-900/40 active:scale-[0.98]"
+            >
+              &larr; Return to Command Center
+            </button>
           </div>
 
         </div>
