@@ -112,11 +112,11 @@ export const Dashboard: React.FC = () => {
            <div>
               <h1 className="text-xl font-black text-white tracking-tight uppercase">Ambient Twin <span className="text-orange-500 font-light italic">Core</span></h1>
               <div className="flex items-center gap-4">
-                 <div className="flex items-center gap-1.5 text-[9px] font-black text-orange-200 uppercase tracking-[0.2em]">
+                 <div className="flex items-center gap-1.5 text-[10px] font-black text-orange-200 uppercase tracking-[0.2em]">
                    <Icons.Location />
                    Toronto Operational Center
                  </div>
-                 <div className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded border transition-colors ${edgeStatus === 'active' ? 'text-orange-400 bg-orange-500/10 border-orange-500/20' : 'text-orange-500 bg-orange-500/10 border-orange-500/20'}`}>
+                 <div className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded border transition-colors ${edgeStatus === 'active' ? 'text-orange-400 bg-orange-500/10 border-orange-500/20' : 'text-orange-500 bg-orange-500/10 border-orange-500/20'}`}>
                    {edgeStatus === 'active' ? <Icons.Lock /> : <Icons.Zap />}
                    {edgeStatus === 'active' ? 'Vault Secure' : 'Sandbox Verification Active'}
                  </div>
@@ -125,10 +125,10 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <nav className="flex items-center gap-8 mt-6 lg:mt-0">
-          <button onClick={() => setActiveTab('twin')} className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === 'twin' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>
+          <button onClick={() => setActiveTab('twin')} className={`text-[12px] font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === 'twin' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>
             Operations
           </button>
-          <button onClick={() => setActiveTab('leads')} className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === 'leads' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>
+          <button onClick={() => setActiveTab('leads')} className={`text-[12px] font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === 'leads' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>
             Rebate CRM
           </button>
           <div className="h-6 w-px bg-white/10" />
@@ -154,10 +154,10 @@ export const Dashboard: React.FC = () => {
                       className={`w-full p-5 border-b border-white/5 text-left transition-all flex items-center justify-between group ${activeDevice?.device_id === d.device_id ? 'bg-orange-600/10 border-l-[6px] border-l-orange-500' : 'hover:bg-white/[0.04]'}`}
                     >
                        <div>
-                          <span className="block text-[12px] font-bold text-white tracking-wide uppercase">{d.properties.name}</span>
-                          <span className="text-[9px] text-orange-200/50 font-mono tracking-tighter uppercase">{d.device_id.slice(-12)}</span>
+                          <span className="block text-[13px] font-black text-white tracking-wide uppercase">{d.properties.name}</span>
+                          <span className="text-[10px] text-orange-200 font-mono font-bold tracking-tighter uppercase">{d.device_id.slice(-12)}</span>
                        </div>
-                       <div className={`px-2 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-tighter ${d.properties.online ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                       <div className={`px-2 py-1 rounded-[2px] text-[9px] font-black uppercase tracking-tighter ${d.properties.online ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
                          {d.properties.online ? 'Online' : 'Offline'}
                        </div>
                     </button>
@@ -168,28 +168,20 @@ export const Dashboard: React.FC = () => {
 
            <GlassCard title="Technical Readiness" icon={<Icons.Zap />} variant="mica">
               <div className="space-y-4">
-                 <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                 <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-wider">
                     <span className="text-white">Supabase Tunnel</span>
                     <span className="text-orange-400 flex items-center gap-1"><Icons.Check /> LINKED</span>
                  </div>
                  
                  <div className="pt-2 border-t border-white/10 space-y-3">
-                    <p className="text-[9px] text-white/50 uppercase font-black tracking-widest">Vaulted API Secrets:</p>
-                    <div className="flex justify-between items-center text-[10px]">
+                    <p className="text-[10px] text-white uppercase font-black tracking-widest">Vaulted API Secrets:</p>
+                    <div className="flex justify-between items-center text-[11px]">
                        <code className="text-orange-400 font-bold">GEMINI_API_KEY</code>
-                       {isSandbox ? (
-                         <span className="text-orange-400 flex items-center gap-1"><Icons.Check /> VERIFIED</span>
-                       ) : (
-                         <span className="text-emerald-400 flex items-center gap-1"><Icons.Check /> VERIFIED</span>
-                       )}
+                       <span className="text-emerald-400 flex items-center gap-1 font-black uppercase tracking-tighter"><Icons.Check /> VERIFIED</span>
                     </div>
-                    <div className="flex justify-between items-center text-[10px]">
+                    <div className="flex justify-between items-center text-[11px]">
                        <code className="text-orange-400 font-bold">SEAM_API_KEY</code>
-                       {isSandbox ? (
-                         <span className="text-orange-400 flex items-center gap-1"><Icons.Check /> VERIFIED</span>
-                       ) : (
-                         <span className="text-emerald-400 flex items-center gap-1"><Icons.Check /> VERIFIED</span>
-                       )}
+                       <span className="text-emerald-400 flex items-center gap-1 font-black uppercase tracking-tighter"><Icons.Check /> VERIFIED</span>
                     </div>
                  </div>
               </div>
@@ -209,11 +201,11 @@ export const Dashboard: React.FC = () => {
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <GlassCard className="border-l-4 border-l-orange-500 shadow-xl bg-gradient-to-br from-orange-600/10 to-transparent">
                        <div className="space-y-6">
-                         <div className="text-orange-400 font-black uppercase tracking-[0.3em] text-[12px]">Current Operational State</div>
+                         <div className="text-orange-400 font-black uppercase tracking-[0.3em] text-[13px]">Current Operational State</div>
                          <h2 className="text-2xl font-black text-white truncate tracking-tight uppercase">{activeDevice.properties.name}</h2>
                          <div className="flex items-baseline gap-3">
                             <span className="text-6xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">{currentReading?.indoorTemp.toFixed(1) || '--'}°</span>
-                            <span className="text-orange-200 text-xs font-black uppercase tracking-[0.2em]">Celsius</span>
+                            <span className="text-orange-200 text-sm font-black uppercase tracking-[0.2em]">Celsius</span>
                          </div>
                        </div>
                     </GlassCard>
@@ -225,7 +217,7 @@ export const Dashboard: React.FC = () => {
                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div className="lg:col-span-8">
                        <GlassCard title="Mechanical Activity Curve" icon={<Icons.Activity />}>
-                          <p className="text-[10px] text-white font-bold uppercase tracking-widest mb-4">Real-Time Heat Exchanger Performance</p>
+                          <p className="text-[12px] text-white font-black uppercase tracking-widest mb-4">Real-Time Heat Exchanger Performance</p>
                           <HeartbeatGraph data={readings} />
                        </GlassCard>
                     </div>
@@ -233,20 +225,20 @@ export const Dashboard: React.FC = () => {
                        <GlassCard title="Predictive Triage" icon={<Icons.Zap />}>
                           <div className="space-y-6">
                              <div className="flex flex-col mb-4">
-                               <span className="text-[14px] font-black text-white uppercase tracking-[0.2em]">Asset Stress Level</span>
-                               <p className="text-[10px] text-white font-bold uppercase tracking-tighter mt-1.5">Mechanical Load Probability Index</p>
+                               <span className="text-[16px] font-black text-white uppercase tracking-[0.2em]">Asset Stress Level</span>
+                               <p className="text-[12px] text-white font-bold uppercase tracking-tighter mt-1.5">Mechanical Load Probability Index</p>
                              </div>
                              <div className="flex justify-between items-end">
-                                <span className={`text-4xl font-black tracking-tighter ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-orange-500' : 'text-emerald-400'}`}>
+                                <span className={`text-5xl font-black tracking-tighter ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-orange-500' : 'text-emerald-400'}`}>
                                   {prediction?.strain_score || '--'}%
                                 </span>
                              </div>
-                             <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                             <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
                                 <div className="h-full bg-orange-500 transition-all duration-1000 shadow-[0_0_15px_rgba(249,115,22,0.8)]" style={{ width: `${prediction?.strain_score || 0}%` }} />
                              </div>
                              <div className="pt-2 flex flex-col gap-3">
                                 {prediction?.recommendations.slice(0, 2).map((r, i) => (
-                                  <div key={i} className="text-[11px] text-white font-medium leading-relaxed flex items-start gap-4 bg-orange-500/5 p-3 rounded border border-orange-500/20 transition-all hover:bg-orange-500/10">
+                                  <div key={i} className="text-[12px] text-white font-black leading-relaxed flex items-start gap-4 bg-orange-500/5 p-4 rounded border border-orange-500/20 transition-all hover:bg-orange-500/10 uppercase tracking-tight">
                                     <div className="mt-1 text-orange-400"><Icons.Check /></div>
                                     {r}
                                   </div>
@@ -261,10 +253,10 @@ export const Dashboard: React.FC = () => {
                           <GlassCard title="Audit Certification" icon={<Icons.ShieldCheck />} variant="mica">
                              <div className="space-y-5">
                                 <div className="flex flex-col">
-                                  <span className="text-base font-black text-white uppercase tracking-[0.2em]">Efficiency Ledger Seal</span>
-                                  <p className="text-[12px] text-white font-bold uppercase tracking-wider mt-2">For 2026 Rebate Submission</p>
+                                  <span className="text-xl font-black text-white uppercase tracking-[0.2em]">Efficiency Ledger Seal</span>
+                                  <p className="text-[14px] text-white font-black uppercase tracking-wider mt-2">For 2026 Rebate Submission</p>
                                 </div>
-                                <p className="text-[12px] text-white leading-relaxed uppercase font-black tracking-[0.1em]">
+                                <p className="text-[14px] text-white leading-relaxed uppercase font-black tracking-[0.1em]">
                                   Finalize immutable efficiency hash for 2026 rebate submission.
                                 </p>
                                 <button 
@@ -276,7 +268,7 @@ export const Dashboard: React.FC = () => {
                                         setIsMinting(false);
                                      }).catch(() => setIsMinting(false));
                                   }}
-                                  className="w-full py-5 bg-orange-600 hover:bg-orange-500 rounded-lg text-[12px] font-black uppercase tracking-[0.25em] text-white transition-all shadow-xl active:scale-[0.98] border border-orange-400/40"
+                                  className="w-full py-6 bg-orange-600 hover:bg-orange-500 rounded-lg text-[13px] font-black uppercase tracking-[0.25em] text-white transition-all shadow-xl active:scale-[0.98] border border-orange-400/40"
                                 >
                                   {isMinting ? 'VALIDATING...' : 'MINT VERIFIED CERTIFICATE'}
                                 </button>

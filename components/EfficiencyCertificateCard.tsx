@@ -61,7 +61,7 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
           <div className="flex flex-col">
             <span className="text-[10px] uppercase font-black tracking-[0.4em] text-orange-500 mb-1">Asset Appraisal Tool</span>
             <h3 className="text-2xl font-black text-white tracking-tighter uppercase leading-none">Efficiency Ledger</h3>
-            <p className="text-[10px] text-white/90 font-bold uppercase tracking-widest mt-2">Certified for Realtor & Lender Review</p>
+            <p className="text-[12px] text-white font-bold uppercase tracking-widest mt-2">Certified for Realtor & Lender Review</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-800/40 border border-orange-500/30 flex items-center justify-center shadow-lg">
              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
@@ -77,7 +77,7 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
                  </div>
                  <div className="flex flex-col">
                     <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">Financial Benefit</span>
-                    <span className="text-sm font-bold text-white tracking-tight">Verified <span className="text-emerald-400">$12,000</span> Rebate Qualified</span>
+                    <span className="text-sm font-bold text-white tracking-tight">Verified <span className="text-emerald-400 font-black">$12,000</span> Rebate Qualified</span>
                  </div>
               </div>
 
@@ -87,7 +87,7 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
                  </div>
                  <div className="flex flex-col">
                     <span className="text-[10px] font-black uppercase text-orange-400 tracking-wider">Property Impact</span>
-                    <span className="text-sm font-bold text-white tracking-tight">Certified <span className="text-orange-400">Elite Grade</span> Asset for Appraisal</span>
+                    <span className="text-sm font-bold text-white tracking-tight">Certified <span className="text-orange-400 font-black">Elite Grade</span> Asset for Appraisal</span>
                  </div>
               </div>
 
@@ -97,13 +97,13 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
                  </div>
                  <div className="flex flex-col">
                     <span className="text-[10px] font-black uppercase text-blue-400 tracking-wider">Operating Savings</span>
-                    <span className="text-sm font-bold text-white tracking-tight"><span className="text-blue-400">40% Lower</span> Energy Consumption Verified</span>
+                    <span className="text-sm font-bold text-white tracking-tight"><span className="text-blue-400 font-black">40% Lower</span> Energy Consumption Verified</span>
                  </div>
               </div>
            </div>
            
            <div className="px-4 py-2 rounded bg-orange-500/5 border border-dashed border-orange-500/20 text-center">
-              <span className="text-[9px] font-black text-white uppercase tracking-[0.2em]">MLS Guidance: Include Score in 'Green Features' Listing</span>
+              <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">MLS Guidance: Include Score in 'Green Features' Listing</span>
            </div>
         </div>
 
@@ -118,44 +118,44 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
               PREMIUM
             </div>
           </div>
-          <div className="mt-2 text-[10px] text-orange-200 font-black tracking-[0.3em] uppercase">
+          <div className="mt-2 text-[12px] text-orange-200 font-black tracking-[0.3em] uppercase">
             Performance Score: {certificate.efficiencyScore}/100
           </div>
         </div>
 
-        {/* Metrics Grid */}
+        {/* Metrics Grid - ENHANCED FOR REALTORS */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="bg-white/[0.02] rounded-lg border border-white/5 p-4 flex flex-col items-center">
-            <span className="text-[9px] text-white/90 uppercase tracking-[0.2em] font-black mb-1">Cooling Performance</span>
-            <span className="text-2xl font-black text-white">{certificate.metrics.seer2}</span>
-            <span className="text-[10px] text-orange-400 font-bold uppercase mt-1">SEER2 Rating</span>
+          <div className="bg-white/[0.02] rounded-lg border border-white/5 p-5 flex flex-col items-center hover:bg-white/[0.04] transition-colors">
+            <span className="text-[12px] text-white uppercase tracking-[0.2em] font-black mb-1">Cooling Performance</span>
+            <span className="text-3xl font-black text-white tracking-tighter">{certificate.metrics.seer2}</span>
+            <span className="text-[11px] text-orange-400 font-black uppercase mt-2 tracking-widest">SEER2 RATING</span>
           </div>
-          <div className="bg-white/[0.02] rounded-lg border border-white/5 p-4 flex flex-col items-center">
-            <span className="text-[9px] text-white/90 uppercase tracking-[0.2em] font-black mb-1">Heating Efficiency</span>
-            <span className="text-2xl font-black text-white">{certificate.metrics.hspf2}</span>
-            <span className="text-[10px] text-orange-400 font-bold uppercase mt-1">HSPF2 Rating</span>
+          <div className="bg-white/[0.02] rounded-lg border border-white/5 p-5 flex flex-col items-center hover:bg-white/[0.04] transition-colors">
+            <span className="text-[12px] text-white uppercase tracking-[0.2em] font-black mb-1">Heating Efficiency</span>
+            <span className="text-3xl font-black text-white tracking-tighter">{certificate.metrics.hspf2}</span>
+            <span className="text-[11px] text-orange-400 font-black uppercase mt-2 tracking-widest">HSPF2 RATING</span>
           </div>
         </div>
 
-        {/* Footer Actions */}
+        {/* Footer Actions - HIGH CONTRAST */}
         <div className="space-y-4 border-t border-white/5 pt-6">
           <div className="flex justify-between items-center font-mono">
-            <span className="text-[9px] tracking-widest text-white/60 font-black uppercase">Asset ID: {certificate.id}</span>
-            <span className="text-[9px] text-white/80 font-bold">{formattedDate}</span>
+            <span className="text-[12px] tracking-widest text-white font-black uppercase">Asset ID: {certificate.id}</span>
+            <span className="text-[12px] text-white font-black uppercase tracking-tight">{formattedDate}</span>
           </div>
 
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={generateRealtorPDF}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-4 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-[10px] uppercase font-black tracking-[0.2em] text-white transition-all border border-white/10"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-4 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-[11px] uppercase font-black tracking-[0.2em] text-white transition-all border border-white/10"
             >
               Print Addendum
             </button>
             <button 
               onClick={handleTogglePublish}
-              className={`px-6 py-4 rounded-lg text-[10px] uppercase font-black tracking-[0.2em] transition-all border shadow-lg ${certificate.isPublished ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-orange-600 text-white border-orange-400 hover:bg-orange-500'}`}
+              className={`px-6 py-4 rounded-lg text-[11px] uppercase font-black tracking-[0.2em] transition-all border shadow-lg ${certificate.isPublished ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-orange-600 text-white border-orange-400 hover:bg-orange-500'}`}
             >
-              {certificate.isPublished ? 'Live' : 'Go Public'}
+              {certificate.isPublished ? 'LIVE' : 'GO PUBLIC'}
             </button>
           </div>
         </div>
