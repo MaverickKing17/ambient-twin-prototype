@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { GlassCard } from './GlassCard';
 import { HeartbeatGraph } from './HeartbeatGraph';
@@ -17,6 +18,7 @@ const Icons = {
   Award: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>,
   ShieldCheck: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>,
   Link: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+  Share: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>,
 };
 
 export const Dashboard: React.FC = () => {
@@ -24,6 +26,7 @@ export const Dashboard: React.FC = () => {
   const [prediction, setPrediction] = useState<SystemStrainPrediction | null>(null);
   const [certificate, setCertificate] = useState<EfficiencyCertificate | null>(null);
   const [isMinting, setIsMinting] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   
   // Connection State
   const [connectedProvider, setConnectedProvider] = useState<ProviderType | null>(null);
@@ -111,6 +114,15 @@ export const Dashboard: React.FC = () => {
     }
   }, [prediction, connectedProvider]);
 
+  const handleSharePortal = () => {
+    const mockHomeId = "HOME-8829-X";
+    const url = `${window.location.origin}/#portal/${mockHomeId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    });
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -159,9 +171,22 @@ export const Dashboard: React.FC = () => {
             )}
           </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-sm px-4 py-1.5 flex items-center gap-2 text-sm text-white font-medium">
-          <span className="text-orange-400"><Icons.ShieldCheck /></span>
-          <span>ML Model v2.5.1 Active</span>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleSharePortal}
+            disabled={!connectedProvider}
+            className={`
+              px-4 py-1.5 rounded-sm border border-white/20 text-xs font-semibold uppercase tracking-wide transition-all flex items-center gap-2
+              ${!connectedProvider ? 'bg-white/5 text-white/30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20 text-white'}
+            `}
+          >
+             <Icons.Share />
+             {linkCopied ? 'Link Copied!' : 'Generate Portal Link'}
+          </button>
+          <div className="bg-white/5 border border-white/10 rounded-sm px-4 py-1.5 flex items-center gap-2 text-sm text-white font-medium">
+            <span className="text-orange-400"><Icons.ShieldCheck /></span>
+            <span>ML Model v2.5.1 Active</span>
+          </div>
         </div>
       </header>
 

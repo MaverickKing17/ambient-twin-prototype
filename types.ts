@@ -1,3 +1,4 @@
+
 // ML Schema for System Strain Predictor
 
 export enum ProviderType {
@@ -63,4 +64,16 @@ export interface EfficiencyCertificate {
   status: 'PENDING' | 'VERIFIED' | 'MINTED';
   isPublished: boolean;
   publicUrl?: string;
+}
+
+// Homeowner Portal Profile
+export interface HomeownerProfile {
+  id: string;
+  address: string;
+  homeownerName: string;
+  currentSystem: string;
+  estimatedRebate: number;
+  monthlyLeakage: number;
+  contractorName: string;
+  lastSync: string;
 }
