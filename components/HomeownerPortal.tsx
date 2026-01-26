@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from './GlassCard';
 import { jsPDF } from "jspdf";
+import { supabaseService } from '../services/supabaseService';
 import { 
   BarChart, 
   Bar, 
@@ -59,13 +60,20 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleConsult = () => {
+  const handleConsult = async () => {
     setSendingLead(true);
-    // Simulate network request for lead capture
-    setTimeout(() => {
+    
+    // Call Supabase to save the lead real-time
+    const success = await supabaseService.captureLead({
+      home_id: homeId,
+      address: profile.address,
+      rebate_amount: profile.rebateAmount
+    });
+
+    if (success) {
       setLeadCaptured(true);
-      setSendingLead(false);
-    }, 1500);
+    }
+    setSendingLead(false);
   };
 
   const downloadGuide = () => {

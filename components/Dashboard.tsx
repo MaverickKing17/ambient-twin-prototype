@@ -5,7 +5,7 @@ import { HeartbeatGraph } from './HeartbeatGraph';
 import { EfficiencyCertificateCard } from './EfficiencyCertificateCard';
 import { generateEfficiencyCertificate } from '../services/ledgerService';
 import { seamService, SEAM_API_KEY } from '../services/seamService';
-import { xanoService } from '../services/xanoService';
+import { supabaseService } from '../services/supabaseService'; // CHANGED: Switched from Xano to Supabase
 import { 
   SystemStrainPrediction, 
   EfficiencyCertificate, 
@@ -91,16 +91,16 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  // 2. Load Data from Backend (Xano) + Seam Telemetry
+  // 2. Load Data from Backend (Supabase) + Seam Telemetry
   const loadDeviceData = async (device: SeamDevice) => {
     try {
-      // Fetch historical telemetry (from Seam/Xano)
+      // Fetch historical telemetry (from Seam/IoT Layer)
       const newReadings = await seamService.getTelemetryHistory(device.device_id);
       setReadings(newReadings);
       setCertificate(null);
 
-      // Run ML Prediction (via Xano)
-      const newPrediction = await xanoService.generatePrediction(device.device_id, newReadings);
+      // Run ML Prediction (via Supabase Service)
+      const newPrediction = await supabaseService.generatePrediction(device.device_id, newReadings);
       setPrediction(newPrediction);
 
     } catch (error) {

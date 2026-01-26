@@ -43,9 +43,9 @@ export interface TelemetryReading {
   powerUsageWatts: number;
 }
 
-// Xano Database Schema: 'system_strain_logs'
+// Supabase Database Schema: 'system_strain_logs'
 export interface SystemStrainInput {
-  user_id: string; // Link to Xano User Table
+  user_id: string; // Link to Supabase Auth User ID
   device_id: string;
   provider: ProviderType;
   readings: TelemetryReading[]; 
@@ -56,7 +56,7 @@ export interface SystemStrainInput {
   };
 }
 
-// Xano Database Schema: 'predictions'
+// Supabase Database Schema: 'predictions'
 export interface SystemStrainPrediction {
   id: string;
   created_at: number;
@@ -65,6 +65,15 @@ export interface SystemStrainPrediction {
   failure_risk: 'LOW' | 'MODERATE' | 'CRITICAL';
   anomalies: string[];
   recommendations: string[];
+}
+
+// Supabase Database Schema: 'leads'
+export interface SalesLead {
+  home_id: string;
+  address: string;
+  rebate_amount: number;
+  status: 'new' | 'contacted' | 'closed';
+  created_at: string;
 }
 
 // Web 3.0 Ledger Interface
