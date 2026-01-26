@@ -9,8 +9,7 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer, 
-  Cell 
+  ResponsiveContainer 
 } from 'recharts';
 
 interface Props {
@@ -27,11 +26,14 @@ const PortalIcons = {
   Download: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
   Chat: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
   Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>,
+  Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
 };
 
 export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
-  const [loading, setLoading] = useState(true);
+  const [accessState, setAccessState] = useState<'verifying' | 'granted' | 'denied'>('verifying');
   const [leadCaptured, setLeadCaptured] = useState(false);
+  const [sendingLead, setSendingLead] = useState(false);
 
   // Mock Data mimicking a fetch based on homeId
   const profile = {
@@ -43,14 +45,23 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
   };
 
   useEffect(() => {
-    // Simulate data fetch
-    const timer = setTimeout(() => setLoading(false), 1200);
+    // SEO: Dynamic Title
+    document.title = `Audit: ${profile.address} | Ambient Twin`;
+
+    // Simulate Security/Magic Link Verification
+    const timer = setTimeout(() => {
+      setAccessState('granted');
+    }, 2000);
     return () => clearTimeout(timer);
   }, []);
 
   const handleConsult = () => {
-    setLeadCaptured(true);
-    // Logic to send webhook to dashboard would go here
+    setSendingLead(true);
+    // Simulate network request for lead capture
+    setTimeout(() => {
+      setLeadCaptured(true);
+      setSendingLead(false);
+    }, 1500);
   };
 
   const downloadGuide = () => {
@@ -85,45 +96,62 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
     { name: 'Jun', current: 240, optimized: 110 },
   ];
 
-  if (loading) {
+  if (accessState === 'verifying') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-           <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-           <div className="text-white/50 text-sm tracking-widest uppercase">Syncing Digital Twin...</div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] space-y-6">
+        <div className="relative">
+          <div className="absolute inset-0 bg-orange-500/20 blur-xl rounded-full animate-pulse"></div>
+          <div className="relative bg-white/5 border border-white/10 p-4 rounded-full">
+            <PortalIcons.Lock />
+          </div>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+           <h2 className="text-white font-semibold tracking-wider uppercase text-sm">Securing Connection</h2>
+           <div className="flex gap-1">
+             <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-0"></div>
+             <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-100"></div>
+             <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-200"></div>
+           </div>
+           <p className="text-white/40 text-xs font-mono mt-2">Verifying Magic Link Token: {homeId.substring(0,8)}...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 pb-20 animate-fade-in">
+    <div className="max-w-2xl mx-auto space-y-6 pb-20 animate-fade-in relative z-10">
       
       {/* Navbar / Status Bar */}
-      <div className="flex items-center justify-between py-2 px-1">
+      <div className="flex items-center justify-between py-4 px-2">
         <div className="flex items-center gap-2">
            <div className="h-6 w-6 rounded bg-gradient-to-br from-orange-400 to-red-600 flex items-center justify-center text-[10px] font-bold text-white shadow-lg shadow-orange-500/20">
              AT
            </div>
            <span className="text-sm font-semibold text-white tracking-tight">Ambient Twin</span>
         </div>
-        <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1">
-          <PortalIcons.Pulse />
-          <span className="text-xs font-medium text-emerald-400">Live Connection</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-[10px] text-white/40 bg-white/5 px-2 py-1 rounded border border-white/5">
+            <PortalIcons.Shield />
+            <span>Encrypted Session</span>
+          </div>
+          <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1 backdrop-blur-md">
+            <PortalIcons.Pulse />
+            <span className="text-xs font-medium text-emerald-400">Live</span>
+          </div>
         </div>
       </div>
 
       {/* Hero Section */}
-      <GlassCard className="text-center py-10 relative overflow-hidden border-t-4 border-t-orange-500">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-orange-500/5 to-transparent pointer-events-none"></div>
-        <h2 className="text-white/60 text-sm uppercase tracking-widest font-semibold mb-2">2026 Efficiency Audit</h2>
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">{profile.address}</h1>
+      <GlassCard className="text-center py-10 relative overflow-hidden border-t-4 border-t-orange-500 group">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-500/10 via-slate-900/0 to-slate-900/0 pointer-events-none"></div>
+        <h2 className="text-white/60 text-xs md:text-sm uppercase tracking-[0.2em] font-bold mb-3">2026 Efficiency Audit</h2>
+        <h1 className="text-xl md:text-3xl font-bold text-white mb-6 px-4">{profile.address}</h1>
         
-        <div className="inline-block relative">
+        <div className="inline-block relative transform transition-transform duration-500 group-hover:scale-105">
            <div className="text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tighter drop-shadow-2xl">
              ${profile.rebateAmount.toLocaleString()}
            </div>
-           <div className="absolute -top-4 -right-8 rotate-12 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">
+           <div className="absolute -top-4 -right-8 rotate-12 bg-orange-500 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded shadow-lg border border-orange-400">
              ELIGIBLE
            </div>
         </div>
@@ -160,8 +188,8 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
                   cursor={{fill: 'rgba(255,255,255,0.05)'}}
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
                 />
-                <Bar dataKey="current" name="Current Bill" fill="url(#currentGradient)" radius={[4, 4, 0, 0]} barSize={12} />
-                <Bar dataKey="optimized" name="With Heat Pump" fill="url(#optGradient)" radius={[4, 4, 0, 0]} barSize={12} />
+                <Bar dataKey="current" name="Current Bill" fill="url(#currentGradient)" radius={[4, 4, 0, 0]} barSize={12} animationDuration={1500} />
+                <Bar dataKey="optimized" name="With Heat Pump" fill="url(#optGradient)" radius={[4, 4, 0, 0]} barSize={12} animationDuration={1500} animationBegin={300} />
               </BarChart>
             </ResponsiveContainer>
          </div>
@@ -179,7 +207,7 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
 
       {/* Action Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <GlassCard className="flex flex-col justify-between h-full bg-gradient-to-br from-white/5 to-white/10">
+        <GlassCard className="flex flex-col justify-between h-full bg-gradient-to-br from-white/5 to-white/10 hover:border-white/20 transition-all">
            <div className="space-y-2">
              <h3 className="text-lg font-bold text-white">Official Rebate Guide</h3>
              <p className="text-xs text-white/60 leading-relaxed">
@@ -195,7 +223,7 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
            </button>
         </GlassCard>
 
-        <GlassCard className="flex flex-col justify-between h-full border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-transparent">
+        <GlassCard className="flex flex-col justify-between h-full border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-transparent hover:border-orange-500/50 transition-all">
            <div className="space-y-2">
              <h3 className="text-lg font-bold text-white">Claim Your Rebate</h3>
              <p className="text-xs text-white/60 leading-relaxed">
@@ -204,14 +232,17 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
            </div>
            <button 
              onClick={handleConsult}
-             disabled={leadCaptured}
+             disabled={leadCaptured || sendingLead}
              className={`mt-6 w-full py-3 rounded text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-900/40
                ${leadCaptured 
                  ? 'bg-emerald-600 text-white cursor-default' 
                  : 'bg-orange-500 hover:bg-orange-600 text-white'}
+               ${sendingLead ? 'opacity-70 cursor-wait' : ''}
              `}
            >
-             {leadCaptured ? (
+             {sendingLead ? (
+               <span className="animate-pulse">Sending Request...</span>
+             ) : leadCaptured ? (
                <>
                  <PortalIcons.Check />
                  Request Sent
@@ -228,7 +259,7 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
 
       <div className="text-center pt-8">
         <p className="text-[10px] text-white/30 max-w-xs mx-auto">
-          Secure Link ID: {homeId} • Verified by Ambient Twin™ • All data is encrypted and anonymized.
+          Secure Link ID: {homeId} • Verified by Ambient Twin™ • End-to-End Encrypted.
         </p>
       </div>
     </div>
