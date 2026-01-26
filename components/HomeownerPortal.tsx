@@ -9,7 +9,8 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer 
+  ResponsiveContainer,
+  Cell
 } from 'recharts';
 
 interface Props {
@@ -27,13 +28,16 @@ const PortalIcons = {
   Chat: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
   Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
   Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>,
-  Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  Info: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
+  Alert: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
 };
 
 export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
   const [accessState, setAccessState] = useState<'verifying' | 'granted' | 'denied'>('verifying');
   const [leadCaptured, setLeadCaptured] = useState(false);
   const [sendingLead, setSendingLead] = useState(false);
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(null);
 
   // Mock Data mimicking a fetch based on homeId
   const profile = {
@@ -88,12 +92,12 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
   };
 
   const chartData = [
-    { name: 'Jan', current: 320, optimized: 180 },
-    { name: 'Feb', current: 300, optimized: 165 },
-    { name: 'Mar', current: 280, optimized: 150 },
-    { name: 'Apr', current: 220, optimized: 120 },
-    { name: 'May', current: 180, optimized: 90 },
-    { name: 'Jun', current: 240, optimized: 110 },
+    { name: 'Jan', current: 320, optimized: 180, reason: "Inefficient Gas Combustion" },
+    { name: 'Feb', current: 300, optimized: 165, reason: "Thermal Envelope Loss" },
+    { name: 'Mar', current: 280, optimized: 150, reason: "Furnace Short Cycling" },
+    { name: 'Apr', current: 220, optimized: 120, reason: "Ductwork Air Leakage" },
+    { name: 'May', current: 180, optimized: 90, reason: "Old Compressor Strain" },
+    { name: 'Jun', current: 240, optimized: 110, reason: "Poor SEER Rating" },
   ];
 
   if (accessState === 'verifying') {
@@ -117,6 +121,8 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
       </div>
     );
   }
+
+  const selectedData = selectedMonthIndex !== null ? chartData[selectedMonthIndex] : null;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-20 animate-fade-in relative z-10">
@@ -165,12 +171,26 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
       <GlassCard title="Projected Financial Waste (6 Mo)">
          <div className="mb-4 text-sm text-white/70">
            Your current <span className="text-white font-bold">{profile.system}</span> is operating at 
-           <span className="text-red-400 font-bold"> 80% efficiency</span>. You are losing approximately 
-           <span className="text-white font-bold"> ${profile.monthlyWaste}/month</span> in potential savings.
+           <span className="text-red-400 font-bold"> 80% efficiency</span>. 
+           {selectedMonthIndex === null ? (
+             <span> You are losing approximately <span className="text-white font-bold"> ${profile.monthlyWaste}/month</span> in potential savings.</span>
+           ) : (
+             <span className="text-orange-300 ml-1">Click on the chart bars to inspect leakage sources.</span>
+           )}
          </div>
-         <div className="h-[250px] w-full">
+         
+         <div className="h-[250px] w-full relative">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <BarChart 
+                data={chartData} 
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                onClick={(data) => {
+                  if (data && data.activeTooltipIndex !== undefined) {
+                    setSelectedMonthIndex(data.activeTooltipIndex);
+                  }
+                }}
+                cursor="pointer"
+              >
                 <defs>
                    <linearGradient id="currentGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8}/>
@@ -188,20 +208,76 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
                   cursor={{fill: 'rgba(255,255,255,0.05)'}}
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
                 />
-                <Bar dataKey="current" name="Current Bill" fill="url(#currentGradient)" radius={[4, 4, 0, 0]} barSize={12} animationDuration={1500} />
-                <Bar dataKey="optimized" name="With Heat Pump" fill="url(#optGradient)" radius={[4, 4, 0, 0]} barSize={12} animationDuration={1500} animationBegin={300} />
+                <Bar 
+                  dataKey="current" 
+                  name="Current Bill" 
+                  fill="url(#currentGradient)" 
+                  radius={[4, 4, 0, 0]} 
+                  barSize={12} 
+                  animationDuration={1500}
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fillOpacity={selectedMonthIndex !== null && selectedMonthIndex !== index ? 0.3 : 1}
+                      stroke={selectedMonthIndex === index ? '#fff' : 'none'}
+                      strokeWidth={selectedMonthIndex === index ? 1 : 0}
+                    />
+                  ))}
+                </Bar>
+                <Bar 
+                  dataKey="optimized" 
+                  name="With Heat Pump" 
+                  fill="url(#optGradient)" 
+                  radius={[4, 4, 0, 0]} 
+                  barSize={12} 
+                  animationDuration={1500} 
+                  animationBegin={300} 
+                >
+                   {chartData.map((entry, index) => (
+                    <Cell 
+                      key={`cell-opt-${index}`} 
+                      fillOpacity={selectedMonthIndex !== null && selectedMonthIndex !== index ? 0.3 : 1}
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
+            
+            {selectedMonthIndex === null && (
+               <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 pointer-events-none bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] text-white/70 border border-white/10 animate-pulse">
+                 Tap any bar to inspect
+               </div>
+            )}
          </div>
-         <div className="flex justify-center gap-6 mt-4 text-xs">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded bg-red-500/50"></span>
-              <span className="text-white/60">Current Waste</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded bg-emerald-500/50"></span>
-              <span className="text-white/60">Optimized Savings</span>
-            </div>
+
+         {/* Interactive Analysis Pane */}
+         <div className={`mt-6 rounded border border-white/5 bg-gradient-to-r from-white/5 to-transparent transition-all duration-500 ease-out overflow-hidden ${selectedData ? 'opacity-100 max-h-40' : 'opacity-50 max-h-12'}`}>
+            {selectedData ? (
+               <div className="p-4 flex flex-col md:flex-row gap-4 items-center">
+                  <div className="flex-shrink-0 p-3 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
+                     <PortalIcons.Alert />
+                  </div>
+                  <div className="flex-1 w-full text-center md:text-left">
+                     <div className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-1">Diagnosis for {selectedData.name}</div>
+                     <h3 className="text-white font-bold text-lg mb-1">{selectedData.reason}</h3>
+                     <p className="text-xs text-white/60">
+                       System efficiency drops due to mechanical strain, causing excess energy draw.
+                     </p>
+                  </div>
+                  <div className="flex-shrink-0 text-center md:text-right bg-black/20 p-3 rounded-md border border-white/5">
+                     <div className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold mb-1">Recoverable</div>
+                     <div className="text-2xl font-bold text-emerald-400">
+                        ${selectedData.current - selectedData.optimized}
+                     </div>
+                  </div>
+               </div>
+            ) : (
+               <div className="p-4 flex items-center justify-center text-white/30 text-xs italic gap-2">
+                 <PortalIcons.Info />
+                 Select a month above to reveal the specific mechanical failure causing the loss.
+               </div>
+            )}
          </div>
       </GlassCard>
 

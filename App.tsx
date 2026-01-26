@@ -3,9 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { PublicVerificationPage } from './components/PublicVerificationPage';
 import { HomeownerPortal } from './components/HomeownerPortal';
+import { LoginScreen } from './components/LoginScreen';
 
 const App: React.FC = () => {
   const [route, setRoute] = useState(window.location.hash);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -17,6 +19,7 @@ const App: React.FC = () => {
   }, []);
 
   const renderContent = () => {
+    // PUBLIC ROUTES (No Login Required)
     if (route.startsWith('#verify/')) {
       const hash = route.split('/')[1];
       return <PublicVerificationPage hash={hash} />;
@@ -25,7 +28,13 @@ const App: React.FC = () => {
       const homeId = route.split('/')[1];
       return <HomeownerPortal homeId={homeId} />;
     }
-    return <Dashboard />;
+
+    // PROTECTED ROUTES (Contractor Only)
+    if (isAuthenticated) {
+      return <Dashboard />;
+    } else {
+      return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+    }
   };
 
   return (

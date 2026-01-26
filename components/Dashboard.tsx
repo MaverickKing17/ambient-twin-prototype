@@ -254,6 +254,24 @@ export const Dashboard: React.FC = () => {
           <div className="lg:col-span-2 space-y-6">
              <GlassCard title="System Heartbeat & Efficiency" icon={<Icons.Activity />}>
                 <HeartbeatGraph data={readings} />
+                
+                {/* Visual Legend & Interpretation */}
+                <div className="mt-4 px-4 py-3 bg-white/5 rounded border border-white/5 text-xs text-white/70 flex flex-col md:flex-row gap-4 justify-between items-center">
+                   <div className="flex gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-1 bg-orange-500 rounded-full"></span>
+                        <span className="font-medium text-white">Indoor Temp (Comfort)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-1 border-t border-dashed border-white"></span>
+                        <span className="font-medium text-white">Efficiency Index</span>
+                      </div>
+                   </div>
+                   <div className="text-right italic opacity-70">
+                     "Stable Orange = Comfort. High White Peaks = Peak Efficiency."
+                   </div>
+                </div>
+
                 <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-white/10">
                   <div className="text-center">
                     <div className="text-xs text-white/50 mb-1 font-medium uppercase">Compressor</div>
