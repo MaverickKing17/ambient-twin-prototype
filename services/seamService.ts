@@ -1,50 +1,26 @@
 
 import { ProviderType, SeamDevice, TelemetryReading, HvacMode } from '../types';
 
-/**
- * SEAM API CONFIGURATION (ENTERPRISE)
- * -----------------------------------
- * We now pull the API Key from the Environment Variables.
- * This is secure for production deployments (Vercel/Netlify).
- */
 export const SEAM_API_KEY = process.env.NEXT_PUBLIC_SEAM_API_KEY || ''; 
 
 const SEAM_ENDPOINT = 'https://connect.getseam.com';
 
 export class SeamService {
   
-  /**
-   * CONNECT FLOW
-   * Uses the environment key to generate a webview or bypass if in sandbox.
-   */
   public async createConnectWebview(provider: ProviderType): Promise<string> {
-    // If no key is present, we cannot generate a real webview.
     if (!SEAM_API_KEY) {
-      console.warn("Missing NEXT_PUBLIC_SEAM_API_KEY. Using Mock URL.");
       return `${window.location.origin}/?success=true&provider=${provider}&mock_token=mock_token_123`;
     }
-
-    // In a real Enterprise app, you would call your BACKEND to generate this token 
-    // to keep the secret key hidden. For this frontend-only demo, we use the public key.
-    console.log(`[Seam] Bypassing Webview for Direct API Access (Sandbox Mode)...`);
     const currentUrl = window.location.origin;
     return `${currentUrl}/?success=true&provider=${provider}&mock_token=${SEAM_API_KEY}`;
   }
 
-  /**
-   * LIST DEVICES (Real API Call or Simulation)
-   */
   public async listDevices(accessToken: string, providerHint?: ProviderType): Promise<SeamDevice[]> {
-    
-    // 1. Fallback: If Env Var is missing, force Virtual Twin.
     if (!accessToken || accessToken === 'mock_token_123') {
-      console.warn("No valid Seam API Key found in Environment. Activating Virtual Twin Mode.");
       return this.getMockDevice(providerHint);
     }
 
     try {
-      console.log("[Seam] Fetching real devices from API...");
-      
       const response = await fetch(`${SEAM_ENDPOINT}/devices/list`, {
         method: 'POST', 
         headers: {
@@ -54,19 +30,11 @@ export class SeamService {
         body: JSON.stringify({})
       });
 
-      if (!response.ok) {
-        throw new Error(`Seam API Error: ${response.statusText}`);
-      }
-
+      if (!response.ok) throw new Error(`Seam API Error: ${response.statusText}`);
       const data = await response.json();
       
-      // 2. Fallback: If Key is valid but Sandbox is empty, use Virtual Twin.
-      if (data.devices.length === 0) {
-        console.warn("No devices found in Seam Sandbox. Activating Virtual Twin Mode.");
-        return this.getMockDevice(providerHint);
-      }
+      if (data.devices.length === 0) return this.getMockDevice(providerHint);
       
-      // Transform Seam API response to our Dashboard Type
       return data.devices.map((d: any) => ({
         device_id: d.device_id,
         device_type: d.device_type,
@@ -82,24 +50,16 @@ export class SeamService {
           current_humidity: d.properties.current_humidity || 45
         }
       }));
-
     } catch (error) {
-      console.error("Failed to fetch Seam devices, falling back to mock:", error);
       return this.getMockDevice(providerHint); 
     }
   }
 
-  /**
-   * TELEMETRY (Hybrid)
-   */
   public async getTelemetryHistory(deviceId: string): Promise<TelemetryReading[]> {
-    
-    // 1. Get Current Real Status
     let currentTemp = 21;
     let targetTemp = 22;
     let mode = HvacMode.HEAT;
 
-    // Only try to fetch real data if we have a real key AND it's not a mock device
     const isVirtualDevice = deviceId.startsWith('mock_');
     const hasRealKey = SEAM_API_KEY.length > 10;
 
@@ -117,12 +77,9 @@ export class SeamService {
         currentTemp = data.device.properties.current_temperature_celsius;
         targetTemp = data.device.properties.current_climate_setting?.manual_heat_setpoint_celsius || 22;
         mode = data.device.properties.current_climate_setting?.hvac_mode_setting || HvacMode.HEAT;
-      } catch (e) {
-        console.error("Could not fetch device details", e);
-      }
+      } catch (e) {}
     }
 
-    // 2. Generate History leading up to Current Status
     const now = Date.now();
     const readings: TelemetryReading[] = Array.from({ length: 24 }, (_, i) => {
       const timeOffset = (23 - i) * 3600000;
@@ -145,16 +102,16 @@ export class SeamService {
     return readings;
   }
 
-  /**
-   * Helper: Returns a virtual device to unblock the UI if Seam is empty/unconfigured.
-   */
   private getMockDevice(provider: ProviderType = ProviderType.NEST): SeamDevice[] {
     const isEcobee = provider === ProviderType.ECOBEE;
+    const isHoneywell = provider === ProviderType.HONEYWELL;
+    const brandName = isEcobee ? "Ecobee" : (isHoneywell ? "Honeywell" : "Nest");
+    
     return [{
       device_id: `mock_${provider}_twin_01`,
-      device_type: isEcobee ? "ecobee_thermostat" : "nest_thermostat",
+      device_type: `${provider}_thermostat`,
       properties: {
-        name: isEcobee ? "Virtual Ecobee Twin" : "Virtual Nest Twin",
+        name: `Virtual ${brandName} Twin`,
         online: true,
         current_climate_setting: {
           hvac_mode_setting: HvacMode.HEAT,

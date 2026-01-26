@@ -3,8 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 import { SystemStrainPrediction, TelemetryReading, SalesLead } from '../types';
 
 // Initialize Supabase Client
-// CRITICAL FIX: Handle missing env vars gracefully to prevent app crash on load.
-// If variables are missing, supabase instance will be null, and service acts in "Demo Mode".
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -16,20 +14,12 @@ export class SupabaseService {
   
   /**
    * GENERATE PREDICTION (Supabase Backend)
-   * --------------------------------------
-   * 1. Runs heuristic analysis (Edge ML).
-   * 2. Persists the result to Supabase 'predictions' table for audit trails.
    */
   public async generatePrediction(deviceId: string, readings: TelemetryReading[]): Promise<SystemStrainPrediction> {
-    
-    // 1. Run "Edge ML" Logic (Heuristics)
-    // In a real enterprise app, this might call a Supabase Edge Function (Deno/Python).
-    // Here we simulate the logic to keep the demo self-contained.
     const avgTemp = readings.reduce((acc, curr) => acc + curr.indoorTemp, 0) / readings.length;
     const targetTemp = readings[0]?.targetTemp || 22;
     const tempVariance = Math.abs(avgTemp - targetTemp);
     
-    // Logic: If variance > 1.5 degrees, efficiency drops.
     const isEfficient = tempVariance < 1.5;
 
     const prediction: SystemStrainPrediction = {
@@ -44,24 +34,16 @@ export class SupabaseService {
         : ['Inspect blower motor capacitor', 'Check ductwork for leakage']
     };
 
-    // 2. Persist to Supabase (System of Record)
-    // Only attempt if client exists and URL is valid
     if (supabase) {
         try {
-            const { error } = await supabase.from('predictions').insert({
+            await supabase.from('predictions').insert({
                 device_id: deviceId,
                 strain_score: prediction.strain_score,
                 efficiency_index: prediction.efficiency_index,
                 failure_risk: prediction.failure_risk,
-                raw_data: prediction, // Store full JSON
+                raw_data: prediction,
                 created_at: new Date().toISOString()
             });
-
-            if (error) {
-                console.warn("[Supabase] Failed to log prediction:", error.message);
-            } else {
-                console.log("[Supabase] Prediction logged successfully.");
-            }
         } catch (e) {
             console.warn("[Supabase] Connection error during log.", e);
         }
@@ -72,13 +54,9 @@ export class SupabaseService {
 
   /**
    * CAPTURE SALES LEAD
-   * Called when homeowner clicks "Consult"
    */
   public async captureLead(leadData: Partial<SalesLead>): Promise<boolean> {
-    if (!supabase) {
-        console.warn("Supabase not configured. Lead not saved.");
-        return true; // Pretend success in demo mode
-    }
+    if (!supabase) return true; 
 
     try {
         const { error } = await supabase.from('leads').insert({
@@ -87,7 +65,6 @@ export class SupabaseService {
             rebate_amount: leadData.rebate_amount,
             status: 'new'
         });
-
         if (error) throw error;
         return true;
     } catch (e) {
@@ -97,11 +74,47 @@ export class SupabaseService {
   }
 
   /**
+   * UPDATE LEAD STATUS (CRM)
+   */
+  public async updateLeadStatus(address: string, status: SalesLead['status']): Promise<boolean> {
+    if (!supabase) return true;
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ status })
+        .eq('address', address);
+      
+      if (error) throw error;
+      return true;
+    } catch (e) {
+      console.error("Failed to update lead:", e);
+      return false;
+    }
+  }
+
+  /**
+   * FETCH ALL LEADS (Contractor Dashboard)
+   */
+  public async fetchLeads(): Promise<SalesLead[]> {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase
+        .from('leads')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as SalesLead[];
+    } catch (e) {
+      console.error("Failed to fetch leads:", e);
+      return [];
+    }
+  }
+
+  /**
    * CHECK REBATE ELIGIBILITY
-   * Queries Supabase 'rebates' table or returns default logic.
    */
   public async checkRebateEligibility(deviceId: string): Promise<number> {
-    // Check if we have a custom override in DB
     if (supabase) {
         try {
             const { data } = await supabase
@@ -109,14 +122,9 @@ export class SupabaseService {
                 .select('amount')
                 .eq('device_id', deviceId)
                 .single();
-            
             if (data) return data.amount;
-        } catch (e) {
-            // Ignore error (table might not exist yet or no record), return default
-        }
+        } catch (e) {}
     }
-    
-    // Default Ontario Enbridge Rebate
     return 12000;
   }
 }

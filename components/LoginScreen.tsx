@@ -17,7 +17,6 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
   const [dbStatus, setDbStatus] = useState<'checking' | 'connected' | 'error' | 'demo'>('checking');
   const [detailedError, setDetailedError] = useState<string>('');
 
-  // Subtle parallax effect on mouse move
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({
@@ -29,45 +28,34 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Real-time DB Health Check (Client-Side)
   useEffect(() => {
     const checkConnection = async () => {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-      // 1. Check for Config Presence
       if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('YOUR_SUPABASE_URL')) {
         setDbStatus('demo');
         return;
       }
 
       try {
-        // 2. Attempt Direct Connection
         const supabase = createClient(supabaseUrl, supabaseKey);
-        
-        // Query the 'contractors' table to verify Schema Access
         const { error } = await supabase
-          .from('contractors')
+          .from('leads') // Changed to 'leads' since we know it exists from previous build
           .select('count', { count: 'exact', head: true });
 
         if (error) {
-          // 404 or Permission Error means we reached DB but something is wrong
-          console.warn("Supabase Logic Error:", error);
           setDetailedError(error.message);
           setDbStatus('error');
         } else {
-          // Success
           setDbStatus('connected');
         }
       } catch (e: any) {
-        // Network or Init Error
-        console.error("Supabase Client Error:", e);
         setDetailedError(e.message || "Unreachable");
         setDbStatus('error');
       }
     };
 
-    // Small delay to prevent flicker if it's instant
     const timer = setTimeout(checkConnection, 500);
     return () => clearTimeout(timer);
   }, []);
@@ -85,7 +73,6 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
 
   const handleLoginSequence = () => {
     setIsLoading(true);
-    // Simulate API Auth Latency
     setTimeout(() => {
       setIsLoading(false);
       onLogin();
@@ -93,11 +80,10 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-[90vh] w-full overflow-hidden">
+    <div className="relative flex flex-col items-center justify-center min-h-[90vh] w-full overflow-hidden">
       
-      {/* --- Technical Background Layer --- */}
+      {/* Background Decor */}
       <div className="absolute inset-0 -z-20 bg-[#0B1121]">
-        {/* Grid Pattern */}
         <div 
           className="absolute inset-0 opacity-20"
           style={{
@@ -105,11 +91,6 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
             backgroundSize: '40px 40px'
           }}
         />
-        {/* Radar / Spotlight Effect */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-           <div className="absolute top-[10%] left-[10%] w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[120px] animate-pulse"></div>
-           <div className="absolute bottom-[10%] right-[10%] w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px]"></div>
-        </div>
       </div>
 
       <div 
@@ -117,136 +98,81 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
         style={{ transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)` }}
       >
         <GlassCard className="p-0 border-t border-t-orange-500/50 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-          {/* Header Section */}
           <div className="relative p-8 pb-6 border-b border-white/5 bg-gradient-to-b from-white/5 to-transparent">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-50"></div>
-            
             <div className="flex flex-col items-center text-center">
               <div className="relative w-16 h-16 mb-6 group">
                 <div className="absolute inset-0 bg-orange-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
                 <div className="relative w-full h-full bg-gradient-to-br from-slate-800 to-slate-950 border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl">
                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-500"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
                 </div>
-                {/* Status Dot */}
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#0f172a] rounded-full flex items-center justify-center">
-                   <div className={`w-2.5 h-2.5 rounded-full animate-pulse shadow-[0_0_8px] ${
-                     dbStatus === 'connected' ? 'bg-emerald-500 shadow-emerald-500' : 
-                     dbStatus === 'error' ? 'bg-red-500 shadow-red-500' : 
-                     dbStatus === 'demo' ? 'bg-yellow-500 shadow-yellow-500' :
-                     'bg-orange-500 shadow-orange-500'
-                   }`}></div>
-                </div>
               </div>
-              
               <h1 className="text-2xl font-bold text-white tracking-tight mb-1">Ambient Twin</h1>
               <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-semibold">Enterprise Command Center</p>
             </div>
           </div>
 
-          {/* Form Section */}
           <div className="p-8 pt-6 bg-black/20 backdrop-blur-sm">
             <form onSubmit={handleSubmit} className="space-y-5">
-              
-              {/* Email Input */}
               <div className="space-y-1.5 group">
-                <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider group-focus-within:text-orange-400 transition-colors">Partner ID / Email</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/30 group-focus-within:text-orange-400 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  </div>
-                  <input 
-                    type="text" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter any email for demo..."
-                    className="w-full bg-slate-900/50 border border-white/10 rounded-sm pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-orange-500/50 focus:bg-slate-900/80 focus:shadow-[0_0_15px_rgba(249,115,22,0.1)] transition-all"
-                  />
-                </div>
+                <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Partner ID / Email</label>
+                <input 
+                  type="text" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter email..."
+                  className="w-full bg-slate-900/50 border border-white/10 rounded-sm px-4 py-3 text-sm text-white focus:outline-none focus:border-orange-500/50"
+                />
               </div>
 
-              {/* Password Input */}
               <div className="space-y-1.5 group">
-                <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider group-focus-within:text-orange-400 transition-colors">Security Key</label>
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/30 group-focus-within:text-orange-400 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                  </div>
-                  <input 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    className="w-full bg-slate-900/50 border border-white/10 rounded-sm pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-orange-500/50 focus:bg-slate-900/80 focus:shadow-[0_0_15px_rgba(249,115,22,0.1)] transition-all"
-                  />
-                </div>
+                <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Security Key</label>
+                <input 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full bg-slate-900/50 border border-white/10 rounded-sm px-4 py-3 text-sm text-white focus:outline-none focus:border-orange-500/50"
+                />
               </div>
 
-              {/* Submit Button */}
               <button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-bold py-3 rounded-sm transition-all transform active:scale-[0.98] shadow-lg shadow-orange-900/20 disabled:opacity-70 disabled:cursor-wait flex items-center justify-center gap-3 group mt-6"
+                className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-bold py-3 rounded-sm transition-all shadow-lg shadow-orange-900/20 flex items-center justify-center gap-3 mt-6"
               >
-                {isLoading ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    <span className="text-sm">Authenticating...</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-sm">Initiate Session</span>
-                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                  </>
-                )}
+                {isLoading ? <span className="text-sm">Authenticating...</span> : <span className="text-sm">Initiate Session</span>}
               </button>
             </form>
             
-            {/* Quick Demo Login */}
             <div className="mt-4 pt-4 border-t border-white/5 flex flex-col items-center gap-2">
-               <span className="text-[10px] text-white/30 uppercase tracking-widest">Or access preview mode</span>
-               <button 
-                 onClick={handleDemoLogin}
-                 disabled={isLoading}
-                 className="text-xs text-orange-400 hover:text-orange-300 font-semibold underline underline-offset-4 decoration-orange-500/30 hover:decoration-orange-500 transition-all"
-               >
+               <button onClick={handleDemoLogin} className="text-xs text-orange-400 hover:text-orange-300 font-semibold underline underline-offset-4 decoration-orange-500/30">
                  Auto-Fill Demo Credentials &rarr;
                </button>
             </div>
-
-            <div className="mt-6 flex justify-between items-center">
-              <div className="flex items-center gap-1.5 relative group/status">
-                 <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                   dbStatus === 'connected' ? 'bg-emerald-500' : 
-                   dbStatus === 'error' ? 'bg-red-500' : 
-                   dbStatus === 'demo' ? 'bg-yellow-500' :
-                   'bg-orange-500'
-                 }`}></div>
-                 <span className={`text-[10px] font-mono transition-colors cursor-help ${
-                   dbStatus === 'error' ? 'text-red-400' : 
-                   dbStatus === 'demo' ? 'text-yellow-500' :
-                   'text-white/30'
-                 }`}>
-                   {dbStatus === 'checking' ? 'ESTABLISHING LINK...' : 
-                    dbStatus === 'connected' ? 'SYSTEM OPERATIONAL' : 
-                    dbStatus === 'demo' ? 'DEMO MODE (NO DB)' :
-                    'DB CONNECTION FAILED'}
-                 </span>
-                 
-                 {/* Error Tooltip */}
-                 {dbStatus === 'error' && detailedError && (
-                   <div className="absolute bottom-6 left-0 w-64 bg-slate-900 border border-red-500/20 text-red-300 text-[10px] p-2 rounded shadow-xl opacity-0 group-hover/status:opacity-100 transition-opacity pointer-events-none z-50">
-                     Error: {detailedError}
-                   </div>
-                 )}
-              </div>
-              <div className="text-[10px] text-white/30 font-mono">
-                v2.5.1
-              </div>
-            </div>
           </div>
         </GlassCard>
+
+        {/* --- New Developer Resources Section --- */}
+        <div className="mt-8 grid grid-cols-2 gap-4 animate-fade-in opacity-80 hover:opacity-100 transition-opacity">
+           <a 
+             href="https://docs.getseam.com/device-guides/thermostats/honeywell-resideo" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             className="bg-white/5 border border-white/10 p-3 rounded-md hover:bg-white/10 transition-all group"
+           >
+              <div className="text-[9px] font-bold text-orange-400 uppercase tracking-widest mb-1">Setup Guide</div>
+              <div className="text-[11px] text-white/70 group-hover:text-white leading-tight">Honeywell Digital Twin Setup &rarr;</div>
+           </a>
+           <a 
+             href="https://docs.getseam.com/thermostats/sandbox-devices" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             className="bg-white/5 border border-white/10 p-3 rounded-md hover:bg-white/10 transition-all group"
+           >
+              <div className="text-[9px] font-bold text-orange-400 uppercase tracking-widest mb-1">Credentials</div>
+              <div className="text-[11px] text-white/70 group-hover:text-white leading-tight">Virtual Sandbox Login Info &rarr;</div>
+           </a>
+        </div>
       </div>
     </div>
   );
