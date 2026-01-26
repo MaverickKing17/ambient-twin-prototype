@@ -47,7 +47,6 @@ export const Dashboard: React.FC = () => {
   const [leads, setLeads] = useState<SalesLead[]>([]);
   const [isLoadingLeads, setIsLoadingLeads] = useState(false);
 
-  // Gemini Live Refs
   const audioContextRef = useRef<AudioContext | null>(null);
   const outAudioContextRef = useRef<AudioContext | null>(null);
   const sessionRef = useRef<any>(null);
@@ -69,7 +68,6 @@ export const Dashboard: React.FC = () => {
 
   const loadLeads = async () => {
     setIsLoadingLeads(true);
-    // Real-world: fetch from Supabase. Pitch-world: show robust data.
     const mockLeads: SalesLead[] = [
       { home_id: "H-101", address: "145 King St W, Toronto", rebate_amount: 12500, status: 'new', created_at: new Date().toISOString() },
       { home_id: "H-102", address: "88 Blue Jays Way, Toronto", rebate_amount: 10600, status: 'contacted', created_at: new Date().toISOString() },
@@ -109,10 +107,9 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  // --- Gemini Live API Logic ---
   const startVoiceSession = async () => {
     if (!process.env.API_KEY) {
-      alert("API_KEY missing. Check Vercel Environment Variables.");
+      alert("System Error: API_KEY missing.");
       return;
     }
     try {
@@ -135,9 +132,9 @@ export const Dashboard: React.FC = () => {
             scriptProcessor.connect(audioContextRef.current!.destination);
           },
           onmessage: async (m) => {
-            const audio = m.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
-            if (audio && outAudioContextRef.current) {
-              const buffer = await decodeAudioData(decode(audio), outAudioContextRef.current, 24000, 1);
+            const audioData = m.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
+            if (audioData && outAudioContextRef.current) {
+              const buffer = await decodeAudioData(decode(audioData), outAudioContextRef.current, 24000, 1);
               const s = outAudioContextRef.current.createBufferSource();
               s.buffer = buffer;
               s.connect(outAudioContextRef.current.destination);
@@ -159,7 +156,10 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  const handleLogout = async () => { if (supabase) await supabase.auth.signOut(); };
+  const stopVoiceSession = () => {
+    if (sessionRef.current) sessionRef.current.close();
+    setIsLiveOpsActive(false);
+  };
 
   const currentReading = readings.length > 0 ? readings[readings.length-1] : null;
 
@@ -180,10 +180,10 @@ export const Dashboard: React.FC = () => {
                  <button 
                   onClick={() => setDemoMode(!demoMode)}
                   className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded border-2 transition-all ${demoMode ? 'bg-orange-500 text-white border-white/40' : 'text-white/40 border-white/10 hover:border-orange-500/50'}`}>
-                   {demoMode ? 'PITCH MODE: ACTIVE' : 'REAL-TIME MODE'}
+                   {demoMode ? 'PITCH MODE: ACTIVE' : 'LIVE TELEMETRY'}
                  </button>
-                 <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded border-2 ${geminiStatus === 'linked' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-red-400 bg-red-500/10 border-red-500/30'}`}>
-                   <Icons.Globe /> {geminiStatus === 'linked' ? 'Uplink Live' : 'Uplink Failed'}
+                 <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded border-2 transition-colors ${geminiStatus === 'linked' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-red-400 bg-red-500/10 border-red-500/30'}`}>
+                   <Icons.Globe /> {geminiStatus === 'linked' ? 'Uplink Live' : 'Link Missing'}
                  </div>
               </div>
            </div>
@@ -191,7 +191,7 @@ export const Dashboard: React.FC = () => {
 
         <div className="flex items-center gap-8 mt-8 lg:mt-0">
           <button 
-            onClick={() => isLiveOpsActive ? sessionRef.current?.close() : startVoiceSession()}
+            onClick={() => isLiveOpsActive ? stopVoiceSession() : startVoiceSession()}
             className={`flex items-center gap-3 px-6 py-3 rounded-full border-2 transition-all duration-500 ${isLiveOpsActive ? 'bg-orange-600 border-white shadow-[0_0_30px_rgba(255,255,255,0.4)]' : 'bg-white/5 border-white/10 hover:border-orange-500/50'}`}
           >
             <div className={`w-3 h-3 rounded-full ${isLiveOpsActive ? 'bg-white animate-ping' : 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,1)]'}`} />
@@ -202,7 +202,8 @@ export const Dashboard: React.FC = () => {
           <nav className="flex items-center gap-10">
             <button onClick={() => setActiveTab('twin')} className={`text-[13px] font-black uppercase tracking-[0.3em] transition-all relative py-3 ${activeTab === 'twin' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>Operations</button>
             <button onClick={() => setActiveTab('leads')} className={`text-[13px] font-black uppercase tracking-[0.3em] transition-all relative py-3 ${activeTab === 'leads' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>Grant Pipeline</button>
-            <button onClick={handleLogout} className="text-white hover:text-red-400 transition-colors p-3 scale-125"><Icons.Power /></button>
+            <div className="h-8 w-px bg-white/10" />
+            <button onClick={() => supabase?.auth.signOut()} className="text-white hover:text-red-400 transition-colors p-3 scale-125"><Icons.Power /></button>
           </nav>
         </div>
       </header>
@@ -211,14 +212,14 @@ export const Dashboard: React.FC = () => {
       {isLiveOpsActive && (
         <div className="fixed inset-0 z-[100] bg-[#0b1120]/80 backdrop-blur-md flex items-center justify-center animate-fade-in px-4">
           <div className="max-w-xl w-full">
-            <GlassCard variant="mica" className="border-2 border-white/20 p-12 text-center">
+            <GlassCard variant="mica" className="border-2 border-white/20 p-12 text-center overflow-hidden">
               <div className="flex flex-col items-center gap-8">
                 <div className="w-32 h-32 rounded-full bg-orange-600/20 border-2 border-orange-500 flex items-center justify-center">
                    <div className="w-24 h-24 rounded-full bg-orange-600/40 animate-ping absolute" />
                    <Icons.Mic />
                 </div>
                 <h2 className="text-2xl font-black text-white uppercase tracking-[0.3em]">AI Concierge Listening</h2>
-                <button onClick={() => sessionRef.current?.close()} className="mt-4 px-10 py-3 bg-white/10 text-white text-[11px] font-black uppercase tracking-[0.4em] rounded border border-white/10 transition-all">Terminate Session</button>
+                <button onClick={stopVoiceSession} className="mt-4 px-10 py-3 bg-white/10 text-white text-[11px] font-black uppercase tracking-[0.4em] rounded border border-white/10 transition-all">Terminate Session</button>
               </div>
             </GlassCard>
           </div>
@@ -236,13 +237,13 @@ export const Dashboard: React.FC = () => {
                     <button
                       key={d.device_id}
                       onClick={() => { setActiveDevice(d); loadDeviceData(d); }}
-                      className={`w-full p-6 border-b border-white/10 text-left transition-all flex items-center justify-between ${activeDevice?.device_id === d.device_id ? 'bg-orange-600/20 border-l-[10px] border-l-orange-500 shadow-[inset_10px_0_20px_rgba(249,115,22,0.1)]' : 'hover:bg-white/[0.08]'}`}
+                      className={`w-full p-6 border-b border-white/10 text-left transition-all flex items-center justify-between group relative ${activeDevice?.device_id === d.device_id ? 'bg-orange-600/20 border-l-[10px] border-l-orange-500 shadow-[inset_10px_0_20px_rgba(249,115,22,0.1)]' : 'hover:bg-white/[0.08]'}`}
                     >
                        <div className="space-y-1.5">
                           <span className="block text-[16px] font-black tracking-wide uppercase text-white">{d.properties.name}</span>
                           <span className="block text-[12px] text-white/40 font-mono">ID: {d.device_id.slice(-6).toUpperCase()}</span>
                        </div>
-                       <div className={`px-4 py-2 rounded text-[11px] font-black uppercase tracking-widest border-2 ${d.properties.online ? 'bg-orange-600/30 text-white border-orange-500' : 'bg-red-600/30 text-white border-red-500'}`}>{d.properties.online ? 'Live' : 'Off'}</div>
+                       <div className={`px-4 py-2 rounded text-[11px] font-black uppercase tracking-widest border-2 transition-all ${d.properties.online ? 'bg-orange-600/30 text-white border-orange-500 shadow-lg shadow-orange-900/40' : 'bg-red-600/30 text-white border-red-500'}`}>{d.properties.online ? 'Live' : 'Off'}</div>
                     </button>
                    ))
                  )}
@@ -253,7 +254,7 @@ export const Dashboard: React.FC = () => {
               <div className="space-y-5">
                  <div className="flex justify-between items-center text-[12px] font-black uppercase tracking-wider text-white">
                     <span>Encrypted Tunnel</span>
-                    <span className="text-emerald-400">LINKED</span>
+                    <span className="text-emerald-400 flex items-center gap-1"><Icons.Check /> LINKED</span>
                  </div>
                  <div className="pt-4 border-t border-white/10 space-y-4">
                     <p className="text-[11px] text-white/40 uppercase font-black tracking-widest">Vaulted API Keys:</p>
@@ -271,7 +272,7 @@ export const Dashboard: React.FC = () => {
               !activeDevice ? (
                 <GlassCard className="flex flex-col items-center justify-center py-80 bg-white/[0.01] border-dashed border-2">
                   <div className="w-24 h-24 bg-orange-500/10 rounded-3xl flex items-center justify-center text-orange-500 border border-orange-500/30 animate-pulse"><Icons.Cpu /></div>
-                  <h2 className="text-lg font-black text-white uppercase tracking-[0.5em] mt-8 animate-pulse">Scanning Satellite Array</h2>
+                  <h2 className="text-lg font-black text-white uppercase tracking-[0.5em] mt-8 animate-pulse">Syncing Satellite Array</h2>
                 </GlassCard>
               ) : (
                 <div className="space-y-8 animate-fade-in">
@@ -311,7 +312,7 @@ export const Dashboard: React.FC = () => {
                               </div>
                               <div className="pt-4 space-y-4">
                                   {prediction?.recommendations.slice(0, 2).map((r, i) => (
-                                    <div key={i} className="text-[13px] text-white font-black leading-relaxed flex items-start gap-4 bg-orange-600/10 p-5 rounded-lg border-2 border-orange-500/20 uppercase">
+                                    <div key={i} className="text-[13px] text-white font-black leading-relaxed flex items-start gap-4 bg-orange-600/10 p-5 rounded-lg border-2 border-orange-500/20 uppercase tracking-tight transition-all hover:bg-orange-500/20">
                                       <div className="mt-1 text-orange-400"><Icons.Check /></div>
                                       {r}
                                     </div>
@@ -350,7 +351,7 @@ export const Dashboard: React.FC = () => {
                                           setIsMinting(false);
                                       }).catch(() => setIsMinting(false));
                                     }}
-                                    className="w-full py-6 bg-orange-600 hover:bg-orange-500 rounded-xl text-[14px] font-black uppercase tracking-[0.3em] text-white transition-all shadow-3xl border-2 border-orange-400/50 flex flex-col items-center justify-center gap-1 group"
+                                    className="w-full py-6 bg-orange-600 hover:bg-orange-500 rounded-xl text-[14px] font-black uppercase tracking-[0.3em] text-white transition-all shadow-3xl border-2 border-orange-400/50 flex flex-col items-center justify-center gap-1 group active:scale-[0.98]"
                                   >
                                     <span className="group-hover:scale-105 transition-transform">{isMinting ? 'VALIDATING DATA...' : 'MINT PROPERTY PASSPORT'}</span>
                                     {!isMinting && <span className="text-[9px] opacity-60 font-black">Official Record Generation</span>}
@@ -387,7 +388,7 @@ export const Dashboard: React.FC = () => {
                    <div className="overflow-x-auto">
                       <table className="w-full text-left">
                         <thead><tr className="bg-white/[0.05] border-b border-white/10">
-                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Property</th>
+                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Property Address</th>
                           <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Verified Rebate</th>
                           <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Status</th>
                           <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Action</th>
@@ -400,7 +401,7 @@ export const Dashboard: React.FC = () => {
                                <td className="p-6">
                                   <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${lead.status === 'new' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' : lead.status === 'contacted' ? 'bg-orange-500/10 text-orange-400 border-orange-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'}`}>{lead.status}</span>
                                </td>
-                               <td className="p-6"><button onClick={() => window.location.hash = `#portal/${lead.home_id}`} className="text-[10px] font-black text-white bg-white/5 px-4 py-2 rounded-lg border border-white/10 flex items-center gap-2 hover:text-orange-400 transition-all uppercase tracking-widest"><Icons.Share /> View Portal</button></td>
+                               <td className="p-6"><button onClick={() => window.location.hash = `#portal/${lead.home_id}`} className="text-[10px] font-black text-white bg-white/5 px-4 py-2 rounded-lg border border-white/10 flex items-center gap-2 hover:text-orange-400 transition-all uppercase tracking-widest shadow-sm active:scale-95"><Icons.Share /> View Portal</button></td>
                              </tr>
                            ))}
                         </tbody>
@@ -415,7 +416,6 @@ export const Dashboard: React.FC = () => {
   );
 };
 
-// --- Helper Functions ---
 function encode(bytes: Uint8Array) { let binary = ''; for (let i = 0; i < bytes.byteLength; i++) { binary += String.fromCharCode(bytes[i]); } return btoa(binary); }
 function decode(base64: string) { const binaryString = atob(base64); const bytes = new Uint8Array(binaryString.length); for (let i = 0; i < binaryString.length; i++) { bytes[i] = binaryString.charCodeAt(i); } return bytes; }
 function createBlob(data: Float32Array): Blob { const int16 = new Int16Array(data.length); for (let i = 0; i < data.length; i++) { int16[i] = data[i] * 32768; } return { data: encode(new Uint8Array(int16.buffer)), mimeType: 'audio/pcm;rate=16000' }; }

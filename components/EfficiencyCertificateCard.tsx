@@ -12,7 +12,6 @@ interface Props {
 const Icons = {
   Value: () => <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
   House: () => <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
-  Bolt: () => <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
   Link: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
 };
 
@@ -52,17 +51,13 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
     doc.save(`Property_Passport_${certificate.id}.pdf`);
   };
 
-  const formattedDate = new Date(certificate.timestamp).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  });
-
   return (
     <div className="relative w-full overflow-hidden rounded-xl p-[1px] bg-gradient-to-br from-orange-400/40 via-white/10 to-transparent shadow-2xl group transition-all hover:scale-[1.01] duration-700">
       <div className="absolute inset-0 bg-[#0f172a] backdrop-blur-3xl rounded-xl z-0" />
       
       <div className="relative z-10 p-6 flex flex-col h-full justify-between min-h-[580px]">
         
-        {/* Header - Enterprise Style */}
+        {/* Header */}
         <div className="flex justify-between items-start border-b border-white/5 pb-5">
           <div className="flex flex-col">
             <span className="text-[10px] uppercase font-black tracking-[0.4em] text-orange-500 mb-1">Asset Appraisal Tool</span>
@@ -79,31 +74,31 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
           </div>
         </div>
 
-        {/* HIGH CLARITY VALUE SUMMARY GRID */}
+        {/* Value Grid */}
         <div className="mt-6 space-y-3">
            <div className="grid grid-cols-1 gap-2">
               <div className="bg-white/[0.03] border border-white/10 rounded-lg p-4 flex items-center gap-4">
                  <div className="p-2.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20"><Icons.Value /></div>
                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black uppercase text-emerald-400">Owner Financials</span>
-                    <span className="text-sm font-bold text-white tracking-tight">Verified <span className="text-emerald-400 font-black">$12,000</span> Grant Ready</span>
+                    <span className="text-[10px] font-black uppercase text-emerald-400">Homeowner Impact</span>
+                    <span className="text-sm font-bold text-white tracking-tight">Confirmed <span className="text-emerald-400 font-black">$12,000</span> Grant Ready</span>
                  </div>
               </div>
 
               <div className="bg-white/[0.03] border border-white/10 rounded-lg p-4 flex items-center gap-4">
                  <div className="p-2.5 bg-orange-500/10 rounded-lg border border-orange-500/20"><Icons.House /></div>
                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black uppercase text-orange-400">Real Estate Listing</span>
-                    <span className="text-sm font-bold text-white tracking-tight">Elite Grade <span className="text-orange-400 font-black">Energy Seal</span> for MLS</span>
+                    <span className="text-[10px] font-black uppercase text-orange-400">Realtor Utility</span>
+                    <span className="text-sm font-bold text-white tracking-tight">Elite <span className="text-orange-400 font-black">Comfort Seal</span> for Listing</span>
                  </div>
               </div>
            </div>
            <div className="px-4 py-2 rounded bg-orange-500/5 border border-dashed border-orange-500/20 text-center">
-              <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Click 'Copy Link' to text this Passport to your Realtor</span>
+              <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Share Passport link with Realtor for MLS boost</span>
            </div>
         </div>
 
-        {/* Grade Display */}
+        {/* Grade */}
         <div className="flex flex-col items-center justify-center my-6 relative">
           <div className="absolute -z-10 w-48 h-48 bg-orange-600/20 blur-[60px] rounded-full animate-pulse" />
           <h1 className="text-[120px] leading-none font-black bg-clip-text text-transparent bg-gradient-to-b from-orange-300 via-orange-500 to-orange-700 drop-shadow-[0_15px_35px_rgba(249,115,22,0.6)] tracking-tighter">
@@ -112,25 +107,25 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
           <div className="mt-2 text-[12px] text-orange-200 font-black tracking-[0.3em] uppercase">Score: {certificate.efficiencyScore}/100</div>
         </div>
 
-        {/* Footer Actions */}
+        {/* Actions */}
         <div className="space-y-4 border-t border-white/5 pt-6">
           <div className="flex justify-between items-center font-mono">
-            <span className="text-[12px] tracking-widest text-white/40 font-black uppercase">Passport ID: {certificate.id}</span>
-            <span className="text-[12px] text-white/40 font-black uppercase tracking-tight">{formattedDate}</span>
+            <span className="text-[12px] tracking-widest text-white/40 font-black uppercase">ID: {certificate.id}</span>
+            <span className="text-[12px] text-white/40 font-black uppercase tracking-tight">{new Date(certificate.timestamp).toLocaleDateString()}</span>
           </div>
 
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={generateRealtorPDF}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-4 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-[11px] uppercase font-black tracking-[0.2em] text-white transition-all border border-white/10"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-4 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-[11px] uppercase font-black tracking-[0.2em] text-white transition-all border border-white/10 active:scale-95"
             >
-              Print Passport
+              Print Record
             </button>
             <button 
               onClick={handleTogglePublish}
-              className={`px-6 py-4 rounded-lg text-[11px] uppercase font-black tracking-[0.2em] transition-all border shadow-lg ${certificate.isPublished ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-orange-600 text-white border-orange-400 hover:bg-orange-500'}`}
+              className={`px-6 py-4 rounded-lg text-[11px] uppercase font-black tracking-[0.2em] transition-all border shadow-lg active:scale-95 ${certificate.isPublished ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-orange-600 text-white border-orange-400 hover:bg-orange-500'}`}
             >
-              {certificate.isPublished ? 'LIVE ON LEDGER' : 'GO PUBLIC'}
+              {certificate.isPublished ? 'SYNCED TO LEDGER' : 'PUBLISH ASSET'}
             </button>
           </div>
         </div>
