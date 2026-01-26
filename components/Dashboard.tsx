@@ -21,6 +21,8 @@ const Icons = {
   ShieldCheck: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>,
   Link: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
   Share: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>,
+  Refresh: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
+  Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 };
 
 export const Dashboard: React.FC = () => {
@@ -34,6 +36,7 @@ export const Dashboard: React.FC = () => {
   const [connectedProvider, setConnectedProvider] = useState<ProviderType | null>(null);
   const [activeDevice, setActiveDevice] = useState<SeamDevice | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [hasNoDevices, setHasNoDevices] = useState(false);
 
   // ENTERPRISE LOGIC: Check for Seam Callback Parameters on Load
   useEffect(() => {
@@ -54,11 +57,14 @@ export const Dashboard: React.FC = () => {
   const initializeSession = async (provider: ProviderType, token: string) => {
     setConnectedProvider(provider);
     setIsConnecting(true);
+    setHasNoDevices(false);
     try {
       const devices = await seamService.listDevices(token);
       if (devices.length > 0) {
         setActiveDevice(devices[0]);
         await loadDeviceData(devices[0]);
+      } else {
+        setHasNoDevices(true);
       }
     } catch (e) {
       console.error("Failed to init session", e);
@@ -73,6 +79,12 @@ export const Dashboard: React.FC = () => {
     // Instant Connect: We bypass the redirect loop because we are in Sandbox Mode
     // and we already possess the valid SEER_API_KEY.
     await initializeSession(provider, SEAM_API_KEY);
+  };
+
+  const handleRetry = () => {
+    if (connectedProvider) {
+      initializeSession(connectedProvider, SEAM_API_KEY);
+    }
   };
 
   // 2. Load Data from Backend (Xano) + Seam Telemetry
@@ -98,6 +110,7 @@ export const Dashboard: React.FC = () => {
     setReadings([]);
     setPrediction(null);
     setCertificate(null);
+    setHasNoDevices(false);
   };
 
   const handleMintCertificate = useCallback(async () => {
@@ -121,6 +134,10 @@ export const Dashboard: React.FC = () => {
       setTimeout(() => setLinkCopied(false), 2000);
     });
   };
+
+  // Helper for safe reading display
+  const currentTemp = readings.length > 0 ? readings[readings.length-1].indoorTemp.toFixed(1) : '--';
+  const efficiencyIndex = prediction?.efficiency_index ? Math.round(prediction.efficiency_index * 100) : 0;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -171,10 +188,10 @@ export const Dashboard: React.FC = () => {
         <div className="flex items-center gap-3">
           <button 
             onClick={handleSharePortal}
-            disabled={!connectedProvider}
+            disabled={!connectedProvider || !activeDevice}
             className={`
               px-4 py-1.5 rounded-sm border border-white/20 text-xs font-semibold uppercase tracking-wide transition-all flex items-center gap-2
-              ${!connectedProvider ? 'bg-white/5 text-white/30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20 text-white'}
+              ${!connectedProvider || !activeDevice ? 'bg-white/5 text-white/30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20 text-white'}
             `}
           >
              <Icons.Share />
@@ -187,7 +204,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content - Only show if connected */}
+      {/* State Handling: 1. Not Connected, 2. No Devices, 3. Active Dashboard */}
       {!connectedProvider ? (
         <div className="flex items-center justify-center h-[400px]">
           <GlassCard className="text-center p-12 max-w-md">
@@ -201,6 +218,31 @@ export const Dashboard: React.FC = () => {
             <div className="text-[10px] text-white/30 uppercase tracking-widest mt-4">
               Powered by Seam API
             </div>
+          </GlassCard>
+        </div>
+      ) : hasNoDevices ? (
+        <div className="flex items-center justify-center h-[400px]">
+          <GlassCard className="text-center p-12 max-w-lg border-orange-500/50">
+             <div className="mx-auto w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center text-orange-500 mb-4 animate-pulse">
+              <Icons.Plus />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">No Thermostat Detected</h2>
+            <div className="text-left bg-black/20 p-4 rounded-md border border-white/5 space-y-3 mb-6">
+              <p className="text-sm text-white/80">Your Seam Sandbox is active, but empty. Please add a virtual device to proceed:</p>
+              <ol className="list-decimal list-inside text-sm text-white/60 space-y-1">
+                <li>Go to the <a href="https://console.seam.co" target="_blank" className="text-orange-400 underline">Seam Console</a>.</li>
+                <li>Click the <strong>+ Add Devices</strong> button.</li>
+                <li>Select <strong>Sandbox</strong>, then choose <strong>Nest</strong> or <strong>Ecobee</strong>.</li>
+                <li>Come back here and click refresh.</li>
+              </ol>
+            </div>
+            <button 
+              onClick={handleRetry}
+              className="px-6 py-2 rounded-sm bg-orange-500 hover:bg-orange-600 text-white font-bold flex items-center gap-2 mx-auto transition-all"
+            >
+              <Icons.Refresh />
+              Refresh Devices
+            </button>
           </GlassCard>
         </div>
       ) : (
@@ -223,7 +265,7 @@ export const Dashboard: React.FC = () => {
                   <span className="text-white/50 ml-2">max potential</span>
                 </div>
                 <p className="text-sm text-white/80 leading-relaxed">
-                  Your system efficiency score of <span className="text-orange-400 font-bold">{Math.round((prediction?.efficiency_index || 0) * 100)}%</span> qualifies you for Tier 1 rebate incentives.
+                  Your system efficiency score of <span className="text-orange-400 font-bold">{efficiencyIndex}%</span> qualifies you for Tier 1 rebate incentives.
                 </p>
                 <button 
                   className="w-full py-2.5 px-4 rounded-sm bg-orange-500 hover:bg-orange-600 text-white transition-all text-sm font-semibold shadow-lg shadow-orange-900/20"
@@ -238,7 +280,7 @@ export const Dashboard: React.FC = () => {
                <GlassCard className="flex flex-col items-center justify-center py-6">
                   <div className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-1">Indoor</div>
                   <div className="text-2xl font-bold text-white flex items-center gap-1">
-                    {readings[readings.length-1]?.indoorTemp.toFixed(1)} <span className="text-sm text-orange-400">°C</span>
+                    {currentTemp} <span className="text-sm text-orange-400">°C</span>
                   </div>
                </GlassCard>
                <GlassCard className="flex flex-col items-center justify-center py-6">

@@ -4,13 +4,12 @@ import { ProviderType, SeamDevice, TelemetryReading, HvacMode } from '../types';
 /**
  * SEAM API CONFIGURATION
  * ----------------------
- * 1. Get your API Key from https://console.seam.co/settings/api-keys
- * 2. This should start with "seam_test_" for the Sandbox.
- * 
- * WARNING: In Production (Phase 2), this key moves to Xano (Backend). 
- * Do not commit this file to public GitHub with the key inside.
+ * 1. Go to your Seam Dashboard (https://console.seam.co)
+ * 2. Click Settings > API Keys
+ * 3. Copy your key (starts with "seam_test_") and paste it below.
  */
-export const SEAM_API_KEY = 'seam_test8bGn_CEMx5rGHRKB8TmCuCpPzp8K2'; 
+export const SEAM_API_KEY = 'seam_test_PASTE_YOUR_KEY_HERE'; 
+
 const SEAM_ENDPOINT = 'https://connect.getseam.com';
 
 export class SeamService {
@@ -36,9 +35,9 @@ export class SeamService {
    */
   public async listDevices(accessToken: string): Promise<SeamDevice[]> {
     
-    // If the user hasn't pasted their key yet, fall back to mock
-    if (accessToken.includes('YOUR_SEAM_API_KEY') || !accessToken) {
-      console.warn("No Seam API Key provided. Returning Mock Data.");
+    // 1. Fallback: If user hasn't set up the key, use Virtual Twin immediately.
+    if (accessToken.includes('PASTE_YOUR_KEY_HERE') || !accessToken) {
+      console.warn("Seam API Key is missing. activating Virtual Twin Mode.");
       return this.getMockDevice();
     }
 
@@ -46,9 +45,9 @@ export class SeamService {
       console.log("[Seam] Fetching real devices from API...");
       
       const response = await fetch(`${SEAM_ENDPOINT}/devices/list`, {
-        method: 'POST', // Seam uses POST for most endpoints
+        method: 'POST', 
         headers: {
-          'Authorization': `Bearer ${accessToken}`, // The Key
+          'Authorization': `Bearer ${accessToken}`, 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({})
@@ -59,6 +58,12 @@ export class SeamService {
       }
 
       const data = await response.json();
+      
+      // 2. Fallback: If Key is valid but Sandbox is empty, use Virtual Twin.
+      if (data.devices.length === 0) {
+        console.warn("No devices found in Seam Sandbox. Activating Virtual Twin Mode.");
+        return this.getMockDevice();
+      }
       
       // Transform Seam API response to our Dashboard Type
       return data.devices.map((d: any) => ({
@@ -78,8 +83,8 @@ export class SeamService {
       }));
 
     } catch (error) {
-      console.error("Failed to fetch Seam devices:", error);
-      return this.getMockDevice();
+      console.error("Failed to fetch Seam devices, falling back to mock:", error);
+      return this.getMockDevice(); 
     }
   }
 
@@ -96,7 +101,11 @@ export class SeamService {
     let targetTemp = 22;
     let mode = HvacMode.HEAT;
 
-    if (SEAM_API_KEY && !SEAM_API_KEY.includes('YOUR_SEAM')) {
+    // Only try to fetch real data if we have a real key AND it's not a mock device
+    const isVirtualDevice = deviceId.startsWith('mock_');
+    const hasRealKey = SEAM_API_KEY && !SEAM_API_KEY.includes('PASTE_YOUR_KEY');
+
+    if (hasRealKey && !isVirtualDevice) {
       try {
         const response = await fetch(`${SEAM_ENDPOINT}/devices/get`, {
             method: 'POST',
@@ -141,20 +150,23 @@ export class SeamService {
     return readings;
   }
 
-  // Fallback for when no key is present
+  /**
+   * Helper: Returns a virtual device to unblock the UI if Seam is empty/unconfigured.
+   */
   private getMockDevice(): SeamDevice[] {
     return [{
-      device_id: `device_mock_123`,
-      device_type: `nest_thermostat`,
+      device_id: "mock_nest_twin_01",
+      device_type: "nest_thermostat",
       properties: {
-        name: `Demo Thermostat (No API Key)`,
+        name: "Virtual Nest Twin",
         online: true,
         current_climate_setting: {
           hvac_mode_setting: HvacMode.HEAT,
-          manual_heat_setpoint_celsius: 22
+          manual_heat_setpoint_celsius: 21.5,
+          manual_cool_setpoint_celsius: 24,
         },
-        current_temperature_celsius: 21.5,
-        current_humidity: 45
+        current_temperature_celsius: 21.0,
+        current_humidity: 42
       }
     }];
   }
