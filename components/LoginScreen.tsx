@@ -26,13 +26,22 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    handleLoginSequence();
+  };
+
+  const handleDemoLogin = () => {
+    setEmail('demo@ambient-twin.ai');
+    setPassword('efficiency_2026');
+    handleLoginSequence();
+  };
+
+  const handleLoginSequence = () => {
     setIsLoading(true);
-    
     // Simulate API Auth Latency
     setTimeout(() => {
       setIsLoading(false);
       onLogin();
-    }, 1500);
+    }, 1200);
   };
 
   return (
@@ -93,12 +102,11 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                   </div>
                   <input 
-                    type="email" 
+                    type="text" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tech@hvac-partners.com"
+                    placeholder="Enter any email for demo..."
                     className="w-full bg-slate-900/50 border border-white/10 rounded-sm pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-orange-500/50 focus:bg-slate-900/80 focus:shadow-[0_0_15px_rgba(249,115,22,0.1)] transition-all"
-                    required
                   />
                 </div>
               </div>
@@ -118,7 +126,6 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     className="w-full bg-slate-900/50 border border-white/10 rounded-sm pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-orange-500/50 focus:bg-slate-900/80 focus:shadow-[0_0_15px_rgba(249,115,22,0.1)] transition-all"
-                    required
                   />
                 </div>
               </div>
@@ -132,7 +139,7 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
                 {isLoading ? (
                   <>
                     <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    <span className="text-sm">Establish Link...</span>
+                    <span className="text-sm">Authenticating...</span>
                   </>
                 ) : (
                   <>
@@ -142,8 +149,20 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
                 )}
               </button>
             </form>
+            
+            {/* Quick Demo Login */}
+            <div className="mt-4 pt-4 border-t border-white/5 flex flex-col items-center gap-2">
+               <span className="text-[10px] text-white/30 uppercase tracking-widest">Or access preview mode</span>
+               <button 
+                 onClick={handleDemoLogin}
+                 disabled={isLoading}
+                 className="text-xs text-orange-400 hover:text-orange-300 font-semibold underline underline-offset-4 decoration-orange-500/30 hover:decoration-orange-500 transition-all"
+               >
+                 Auto-Fill Demo Credentials &rarr;
+               </button>
+            </div>
 
-            <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center">
+            <div className="mt-6 flex justify-between items-center">
               <div className="flex items-center gap-1.5">
                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
                  <span className="text-[10px] text-white/30 font-mono">SYSTEM OPERATIONAL</span>

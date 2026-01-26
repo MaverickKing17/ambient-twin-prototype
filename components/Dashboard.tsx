@@ -135,9 +135,14 @@ export const Dashboard: React.FC = () => {
     <div className="max-w-7xl mx-auto space-y-6">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-white tracking-tight">
-            Digital Twin Dashboard
-          </h1>
+          <div className="flex items-center gap-3">
+             <h1 className="text-3xl font-semibold text-white tracking-tight">
+               Digital Twin Dashboard
+             </h1>
+             <span className="px-2 py-0.5 rounded text-[10px] bg-orange-500/10 border border-orange-500/20 text-orange-400 font-bold uppercase tracking-wider">
+               Sandbox Mode
+             </span>
+          </div>
           <div className="mt-2 flex items-center gap-3 flex-wrap">
             {!connectedProvider ? (
               <div className="flex gap-2 flex-wrap">
@@ -146,21 +151,14 @@ export const Dashboard: React.FC = () => {
                   disabled={isConnecting}
                   className="px-4 py-1.5 rounded-sm bg-white/5 hover:bg-orange-500 hover:text-white border border-white/20 text-xs font-semibold uppercase tracking-wide transition-all flex items-center gap-2"
                 >
-                   {isConnecting ? 'Connecting...' : 'Connect Ecobee'}
+                   {isConnecting ? 'Connecting...' : 'Connect Ecobee (Sandbox)'}
                 </button>
                 <button 
                    onClick={() => handleConnectProvider(ProviderType.NEST)}
                    disabled={isConnecting}
                    className="px-4 py-1.5 rounded-sm bg-white/5 hover:bg-orange-500 hover:text-white border border-white/20 text-xs font-semibold uppercase tracking-wide transition-all flex items-center gap-2"
                 >
-                   {isConnecting ? 'Connecting...' : 'Connect Nest'}
-                </button>
-                <button 
-                   onClick={() => handleConnectProvider(ProviderType.HONEYWELL)}
-                   disabled={isConnecting}
-                   className="px-4 py-1.5 rounded-sm bg-white/5 hover:bg-orange-500 hover:text-white border border-white/20 text-xs font-semibold uppercase tracking-wide transition-all flex items-center gap-2"
-                >
-                   {isConnecting ? 'Connecting...' : 'Connect Honeywell'}
+                   {isConnecting ? 'Connecting...' : 'Connect Nest (Sandbox)'}
                 </button>
               </div>
             ) : (
