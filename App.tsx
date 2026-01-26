@@ -26,14 +26,14 @@ const App: React.FC = () => {
     };
     checkUser();
 
-    // 2. Listen for auth changes
-    const { data: { subscription } } = supabase?.auth.onAuthStateChange((event, session) => {
+    // 2. Listen for auth changes - Added robust optional chaining to prevent black screen crash
+    const authSubscription = supabase?.auth?.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' || session) {
         setIsAuthenticated(true);
       } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
       }
-    }) || { data: { subscription: null } };
+    });
 
     // 3. Handle routing
     const handleHashChange = () => setRoute(window.location.hash);
@@ -41,7 +41,7 @@ const App: React.FC = () => {
     
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
-      subscription?.unsubscribe();
+      authSubscription?.data?.subscription?.unsubscribe();
     };
   }, []);
 

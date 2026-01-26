@@ -2,6 +2,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>
+      // Crucial: This must run before any other scripts to prevent runtime crashes
+      window.process = window.process || { env: {} };
+      // If Vercel injects values into window, ensure they are mapped to process.env
+      if (window.API_KEY) window.process.env.API_KEY = window.API_KEY;
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ambient Twin | HVAC Enterprise Command Center</title>
