@@ -140,7 +140,11 @@ export const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24">
         <aside className="lg:col-span-3 space-y-8">
-           <GlassCard title="Global Asset Inventory" icon={<Icons.Activity />} className="p-0 overflow-hidden border-2">
+           <GlassCard title="System Equipment Registry" icon={<Icons.Activity />} className="p-0 overflow-hidden border-2">
+              <div className="bg-slate-900/60 p-5 border-b border-white/10">
+                 <p className="text-[11px] text-white font-black uppercase tracking-widest">Property Asset List</p>
+                 <p className="text-[10px] text-orange-400 font-bold uppercase tracking-tighter mt-1 italic">Verified Digital Twin Inventory</p>
+              </div>
               <div className="max-h-[700px] overflow-y-auto custom-scrollbar bg-slate-900/40">
                  {isConnecting ? (
                    <div className="p-20 text-center space-y-6 animate-pulse">
