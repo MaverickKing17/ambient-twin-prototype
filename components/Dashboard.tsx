@@ -209,7 +209,7 @@ export const Dashboard: React.FC = () => {
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <GlassCard className="border-l-4 border-l-orange-500 shadow-xl bg-gradient-to-br from-orange-600/10 to-transparent">
                        <div className="space-y-6">
-                         <div className="text-orange-400 font-black uppercase tracking-[0.3em] text-[10px]">Current Operational State</div>
+                         <div className="text-orange-400 font-black uppercase tracking-[0.3em] text-[12px]">Current Operational State</div>
                          <h2 className="text-2xl font-black text-white truncate tracking-tight uppercase">{activeDevice.properties.name}</h2>
                          <div className="flex items-baseline gap-3">
                             <span className="text-6xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">{currentReading?.indoorTemp.toFixed(1) || '--'}°</span>
@@ -233,8 +233,8 @@ export const Dashboard: React.FC = () => {
                        <GlassCard title="Predictive Triage" icon={<Icons.Zap />}>
                           <div className="space-y-6">
                              <div className="flex flex-col mb-4">
-                               <span className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Asset Stress Level</span>
-                               <p className="text-[9px] text-white/50 font-bold uppercase tracking-tighter mt-1">Mechanical Load Probability Index</p>
+                               <span className="text-[14px] font-black text-white uppercase tracking-[0.2em]">Asset Stress Level</span>
+                               <p className="text-[10px] text-white/50 font-bold uppercase tracking-tighter mt-1.5">Mechanical Load Probability Index</p>
                              </div>
                              <div className="flex justify-between items-end">
                                 <span className={`text-4xl font-black tracking-tighter ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-orange-500' : 'text-emerald-400'}`}>
@@ -261,10 +261,10 @@ export const Dashboard: React.FC = () => {
                           <GlassCard title="Audit Certification" icon={<Icons.ShieldCheck />} variant="mica">
                              <div className="space-y-5">
                                 <div className="flex flex-col">
-                                  <span className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Efficiency Ledger Seal</span>
-                                  <p className="text-[9px] text-white/50 font-bold uppercase tracking-tighter mt-1">For 2026 Rebate Submission</p>
+                                  <span className="text-base font-black text-white uppercase tracking-[0.2em]">Efficiency Ledger Seal</span>
+                                  <p className="text-[12px] text-white/50 font-bold uppercase tracking-wider mt-2">For 2026 Rebate Submission</p>
                                 </div>
-                                <p className="text-[11px] text-white leading-relaxed uppercase font-black tracking-[0.2em]">
+                                <p className="text-[12px] text-white leading-relaxed uppercase font-black tracking-[0.1em] opacity-80">
                                   Finalize immutable efficiency hash for 2026 rebate submission.
                                 </p>
                                 <button 
@@ -276,7 +276,7 @@ export const Dashboard: React.FC = () => {
                                         setIsMinting(false);
                                      }).catch(() => setIsMinting(false));
                                   }}
-                                  className="w-full py-4 bg-orange-600 hover:bg-orange-500 rounded text-[11px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-xl active:scale-[0.98] border border-orange-400/40"
+                                  className="w-full py-5 bg-orange-600 hover:bg-orange-500 rounded-lg text-[12px] font-black uppercase tracking-[0.25em] text-white transition-all shadow-xl active:scale-[0.98] border border-orange-400/40"
                                 >
                                   {isMinting ? 'VALIDATING...' : 'MINT VERIFIED CERTIFICATE'}
                                 </button>
