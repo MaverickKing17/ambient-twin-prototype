@@ -15,16 +15,24 @@ const App: React.FC = () => {
     // 1. Check current session on load
     const checkUser = async () => {
       if (supabase) {
-        const { data: { session } } = await supabase.auth.getSession();
-        setIsAuthenticated(!!session);
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) setIsAuthenticated(true);
+        } catch (e) {
+          console.warn("Supabase Auth unreachable.");
+        }
       }
       setIsInitializing(false);
     };
     checkUser();
 
     // 2. Listen for auth changes
-    const { data: { subscription } } = supabase?.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
+    const { data: { subscription } } = supabase?.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || session) {
+        setIsAuthenticated(true);
+      } else if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
+      }
     }) || { data: { subscription: null } };
 
     // 3. Handle routing
@@ -36,6 +44,10 @@ const App: React.FC = () => {
       subscription?.unsubscribe();
     };
   }, []);
+
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+  };
 
   const renderContent = () => {
     // PUBLIC ROUTES (No Login Required)
@@ -51,7 +63,7 @@ const App: React.FC = () => {
     if (isInitializing) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-[#0b1120]">
-          <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
         </div>
       );
     }
@@ -60,12 +72,12 @@ const App: React.FC = () => {
     if (isAuthenticated) {
       return <Dashboard />;
     } else {
-      return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+      return <LoginScreen onLogin={handleLoginSuccess} />;
     }
   };
 
   return (
-    <div className="min-h-screen w-full p-0 md:p-0">
+    <div className="min-h-screen w-full overflow-x-hidden">
       {renderContent()}
     </div>
   );
