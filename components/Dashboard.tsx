@@ -75,6 +75,15 @@ export const Dashboard: React.FC = () => {
     if (supabase) await supabase.auth.signOut();
   };
 
+  const handleSharePortal = () => {
+    const mockHomeId = activeDevice ? `GTA-${activeDevice.device_id.slice(-6).toUpperCase()}` : "DEMO";
+    const url = `${window.location.origin}/#portal/${mockHomeId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    });
+  };
+
   const currentReading = readings.length > 0 ? readings[readings.length-1] : null;
 
   return (
@@ -95,7 +104,7 @@ export const Dashboard: React.FC = () => {
                  </div>
                  <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                    <Icons.Lock />
-                   Keys Vaulted (Edge Functions Active)
+                   Vault Active (Keys Hidden)
                  </div>
               </div>
            </div>
@@ -109,6 +118,12 @@ export const Dashboard: React.FC = () => {
             Rebate CRM
           </button>
           <div className="h-6 w-px bg-white/10" />
+          <button 
+              onClick={handleSharePortal}
+              className="px-6 py-2.5 rounded bg-blue-600 hover:bg-blue-500 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-lg"
+            >
+              {linkCopied ? 'Token Copied' : 'Sync Portal'}
+            </button>
           <button onClick={handleLogout} className="text-white/30 hover:text-red-400 transition-colors p-2">
             <Icons.Power />
           </button>
@@ -118,7 +133,7 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
         <aside className="lg:col-span-3 space-y-6">
            <GlassCard title="Global Asset Inventory" icon={<Icons.Activity />} className="p-0 overflow-hidden">
-              <div className="max-h-[600px] overflow-y-auto">
+              <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
                  {isConnecting ? (
                    <div className="p-16 text-center space-y-4">
                       <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
