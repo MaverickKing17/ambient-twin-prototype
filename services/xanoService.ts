@@ -2,14 +2,11 @@
 import { SystemStrainPrediction, TelemetryReading } from '../types';
 
 /**
- * XANO API CONFIGURATION
- * ----------------------
- * 1. Create your Xano API Group (e.g., "ambient_twin")
- * 2. Create a POST endpoint "/predict_strain"
- * 3. Copy your Base URL (e.g. "https://x8ki-letl-twmt.n7.xano.io/api:UniqueGroupID")
- * 4. Paste it below.
+ * XANO API CONFIGURATION (ENTERPRISE)
+ * -----------------------------------
+ * Configure NEXT_PUBLIC_XANO_API_BASE_URL in your .env file.
  */
-export const XANO_API_BASE_URL = 'https://x8ki-letl-twmt.n7.xano.io/api:YOUR_GROUP_ID_HERE';
+export const XANO_API_BASE_URL = process.env.NEXT_PUBLIC_XANO_API_BASE_URL || '';
 
 /**
  * Service Layer for Xano Backend
@@ -19,13 +16,12 @@ export class XanoService {
   
   /**
    * Calls Xano endpoint: /predict_strain
-   * This sends raw telemetry to the server to run the Heavy ML Model.
    */
   public async generatePrediction(deviceId: string, readings: TelemetryReading[]): Promise<SystemStrainPrediction> {
     
     // 1. CHECK FOR MOCK MODE
-    // If the user hasn't configured Xano yet, run the local ML simulation.
-    if (XANO_API_BASE_URL.includes('YOUR_GROUP_ID_HERE')) {
+    if (!XANO_API_BASE_URL) {
+      console.log("[Xano] No API URL configured. Running local ML simulation.");
       return this.runLocalSimulation(readings);
     }
 
@@ -57,7 +53,6 @@ export class XanoService {
 
     } catch (error) {
       console.warn("Xano Connection Failed. Falling back to local simulation.", error);
-      // Fallback to local simulation to prevent UI crash
       return this.runLocalSimulation(readings);
     }
   }
@@ -66,7 +61,7 @@ export class XanoService {
    * Calls Xano endpoint: /check_rebate
    */
   public async checkRebateEligibility(deviceId: string): Promise<number> {
-    if (XANO_API_BASE_URL.includes('YOUR_GROUP_ID_HERE')) {
+    if (!XANO_API_BASE_URL) {
         await new Promise(resolve => setTimeout(resolve, 500));
         return 12000;
     }
@@ -84,10 +79,8 @@ export class XanoService {
 
   /**
    * LOCAL ML SIMULATION (Fallback)
-   * Mimics the logic you will eventually build in Xano.
    */
   private async runLocalSimulation(readings: TelemetryReading[]): Promise<SystemStrainPrediction> {
-    console.log(`[Local ML] Simulating strain calculation...`);
     
     // Simulate Server Latency
     await new Promise(resolve => setTimeout(resolve, 1200));

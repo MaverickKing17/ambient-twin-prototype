@@ -38,8 +38,9 @@ export const Dashboard: React.FC = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [hasNoDevices, setHasNoDevices] = useState(false);
 
-  // Check if we are in Demo Mode (No real API key)
-  const isDemoMode = SEAM_API_KEY.includes('PASTE_YOUR_KEY');
+  // Check if we are in Simulator Mode (Missing Env Vars)
+  // If SEAM_API_KEY is empty or default, we are in Simulator Mode.
+  const isDemoMode = !SEAM_API_KEY || SEAM_API_KEY.length < 5;
 
   // ENTERPRISE LOGIC: Check for Seam Callback Parameters on Load
   useEffect(() => {
@@ -80,13 +81,13 @@ export const Dashboard: React.FC = () => {
   const handleConnectProvider = async (provider: ProviderType) => {
     setIsConnecting(true);
     // Instant Connect: We bypass the redirect loop because we are in Sandbox Mode
-    // and we already possess the valid SEER_API_KEY.
-    await initializeSession(provider, SEAM_API_KEY);
+    // and we already possess the valid SEAM_API_KEY (if set).
+    await initializeSession(provider, SEAM_API_KEY || 'mock_token_123');
   };
 
   const handleRetry = () => {
     if (connectedProvider) {
-      initializeSession(connectedProvider, SEAM_API_KEY);
+      initializeSession(connectedProvider, SEAM_API_KEY || 'mock_token_123');
     }
   };
 
@@ -151,7 +152,7 @@ export const Dashboard: React.FC = () => {
                Digital Twin Dashboard
              </h1>
              <span className={`px-2 py-0.5 rounded text-[10px] border font-bold uppercase tracking-wider ${isDemoMode ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-orange-500/10 border-orange-500/20 text-orange-400'}`}>
-               {isDemoMode ? 'Simulator Mode' : 'Sandbox Mode'}
+               {isDemoMode ? 'Simulator Mode' : 'Production Mode'}
              </span>
           </div>
           <div className="mt-2 flex items-center gap-3 flex-wrap">
