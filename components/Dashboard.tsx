@@ -25,7 +25,8 @@ const Icons = {
   Location: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>,
   Power: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>,
   Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
-  External: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+  External: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+  Info: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
 };
 
 export const Dashboard: React.FC = () => {
@@ -118,6 +119,15 @@ export const Dashboard: React.FC = () => {
   };
 
   const currentReading = readings.length > 0 ? readings[readings.length-1] : null;
+
+  // Derived health status based on strain score
+  const getStrainStatus = (score: number) => {
+    if (score < 25) return { label: 'HEALTHY', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' };
+    if (score < 55) return { label: 'LABORED', color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30' };
+    return { label: 'CRITICAL', color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/30' };
+  };
+
+  const strainStatus = getStrainStatus(prediction?.strain_score || 0);
 
   return (
     <div className="max-w-[1500px] mx-auto space-y-6 animate-fade-in px-4 py-8">
@@ -255,20 +265,48 @@ export const Dashboard: React.FC = () => {
                         <GlassCard title="Predictive Triage" icon={<Icons.Zap />} className="border-2">
                             <div className="space-y-8">
                               <div className="flex flex-col mb-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[18px] font-black text-white uppercase tracking-[0.2em]">Asset Stress Level</span>
-                                    <span className="bg-white/10 px-2 py-0.5 rounded text-[9px] text-white font-black uppercase">Tech View</span>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[18px] font-black text-white uppercase tracking-[0.2em]">Mechanical Effort</span>
+                                        <span className="bg-white/10 px-2 py-0.5 rounded text-[9px] text-white font-black uppercase">System Load</span>
+                                    </div>
+                                    <div className={`${strainStatus.bg} ${strainStatus.color} ${strainStatus.border} px-3 py-1 rounded border text-[10px] font-black uppercase tracking-widest`}>
+                                      {strainStatus.label}
+                                    </div>
                                 </div>
-                                <p className="text-[13px] text-white font-bold uppercase tracking-tighter mt-2 border-t border-white/5 pt-2 italic">Wear & Tear Index (Homeowner Savings Link)</p>
+                                <p className="text-[13px] text-white font-bold uppercase tracking-tighter mt-4 border-t border-white/5 pt-3 italic">
+                                  ML-Calculated Wear & Tear Index
+                                </p>
                               </div>
+
                               <div className="flex justify-between items-end">
                                   <span className={`text-6xl font-black tracking-tighter ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-orange-500' : 'text-emerald-400'}`}>
                                     {prediction?.strain_score || '--'}%
                                   </span>
+                                  <span className="text-white/60 text-[10px] font-black uppercase tracking-widest mb-2 pb-1">Load Intensity</span>
                               </div>
                               <div className="w-full h-4 bg-white/10 rounded-full overflow-hidden shadow-inner">
-                                  <div className="h-full bg-orange-500 transition-all duration-1000 shadow-[0_0_20px_rgba(249,115,22,1)]" style={{ width: `${prediction?.strain_score || 0}%` }} />
+                                  <div className={`h-full transition-all duration-1000 shadow-[0_0_20px_rgba(249,115,22,1)] ${prediction?.strain_score && prediction.strain_score > 50 ? 'bg-orange-500' : 'bg-emerald-500'}`} style={{ width: `${prediction?.strain_score || 0}%` }} />
                               </div>
+
+                              {/* Persona Interpretation Grid */}
+                              <div className="grid grid-cols-1 gap-3 border-y border-white/5 py-6 my-2">
+                                <div className="flex items-start gap-4">
+                                  <div className="mt-1"><Icons.Info /></div>
+                                  <div className="space-y-1">
+                                    <p className="text-[11px] font-black text-white uppercase tracking-widest underline decoration-orange-500/50">Owner Impact:</p>
+                                    <p className="text-[11px] text-white/90 font-bold uppercase tracking-tight leading-none">High Effort = Higher Energy Bills</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-start gap-4">
+                                  <div className="mt-1 text-orange-400"><Icons.Info /></div>
+                                  <div className="space-y-1">
+                                    <p className="text-[11px] font-black text-white uppercase tracking-widest underline decoration-blue-500/50">Realtor Impact:</p>
+                                    <p className="text-[11px] text-white/90 font-bold uppercase tracking-tight leading-none">Low Stress = Extended Resale Life</p>
+                                  </div>
+                                </div>
+                              </div>
+
                               <div className="pt-4 flex flex-col gap-4">
                                   {prediction?.recommendations.slice(0, 2).map((r, i) => (
                                     <div key={i} className="text-[13px] text-white font-black leading-relaxed flex items-start gap-5 bg-orange-600/10 p-5 rounded-lg border-2 border-orange-500/20 transition-all hover:bg-orange-500/20 uppercase tracking-tight">
