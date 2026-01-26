@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { GlassCard } from './GlassCard';
 
 interface Props {
@@ -11,6 +12,10 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  
+  // Connection Status State
+  const [dbStatus, setDbStatus] = useState<'checking' | 'connected' | 'error' | 'demo'>('checking');
+  const [detailedError, setDetailedError] = useState<string>('');
 
   // Subtle parallax effect on mouse move
   useEffect(() => {
@@ -22,6 +27,49 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Real-time DB Health Check (Client-Side)
+  useEffect(() => {
+    const checkConnection = async () => {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+      // 1. Check for Config Presence
+      if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('YOUR_SUPABASE_URL')) {
+        setDbStatus('demo');
+        return;
+      }
+
+      try {
+        // 2. Attempt Direct Connection
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        // Query the 'contractors' table to verify Schema Access
+        const { error } = await supabase
+          .from('contractors')
+          .select('count', { count: 'exact', head: true });
+
+        if (error) {
+          // 404 or Permission Error means we reached DB but something is wrong
+          console.warn("Supabase Logic Error:", error);
+          setDetailedError(error.message);
+          setDbStatus('error');
+        } else {
+          // Success
+          setDbStatus('connected');
+        }
+      } catch (e: any) {
+        // Network or Init Error
+        console.error("Supabase Client Error:", e);
+        setDetailedError(e.message || "Unreachable");
+        setDbStatus('error');
+      }
+    };
+
+    // Small delay to prevent flicker if it's instant
+    const timer = setTimeout(checkConnection, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -81,7 +129,12 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
                 </div>
                 {/* Status Dot */}
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#0f172a] rounded-full flex items-center justify-center">
-                   <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]"></div>
+                   <div className={`w-2.5 h-2.5 rounded-full animate-pulse shadow-[0_0_8px] ${
+                     dbStatus === 'connected' ? 'bg-emerald-500 shadow-emerald-500' : 
+                     dbStatus === 'error' ? 'bg-red-500 shadow-red-500' : 
+                     dbStatus === 'demo' ? 'bg-yellow-500 shadow-yellow-500' :
+                     'bg-orange-500 shadow-orange-500'
+                   }`}></div>
                 </div>
               </div>
               
@@ -163,9 +216,30 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
             </div>
 
             <div className="mt-6 flex justify-between items-center">
-              <div className="flex items-center gap-1.5">
-                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                 <span className="text-[10px] text-white/30 font-mono">SYSTEM OPERATIONAL</span>
+              <div className="flex items-center gap-1.5 relative group/status">
+                 <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                   dbStatus === 'connected' ? 'bg-emerald-500' : 
+                   dbStatus === 'error' ? 'bg-red-500' : 
+                   dbStatus === 'demo' ? 'bg-yellow-500' :
+                   'bg-orange-500'
+                 }`}></div>
+                 <span className={`text-[10px] font-mono transition-colors cursor-help ${
+                   dbStatus === 'error' ? 'text-red-400' : 
+                   dbStatus === 'demo' ? 'text-yellow-500' :
+                   'text-white/30'
+                 }`}>
+                   {dbStatus === 'checking' ? 'ESTABLISHING LINK...' : 
+                    dbStatus === 'connected' ? 'SYSTEM OPERATIONAL' : 
+                    dbStatus === 'demo' ? 'DEMO MODE (NO DB)' :
+                    'DB CONNECTION FAILED'}
+                 </span>
+                 
+                 {/* Error Tooltip */}
+                 {dbStatus === 'error' && detailedError && (
+                   <div className="absolute bottom-6 left-0 w-64 bg-slate-900 border border-red-500/20 text-red-300 text-[10px] p-2 rounded shadow-xl opacity-0 group-hover/status:opacity-100 transition-opacity pointer-events-none z-50">
+                     Error: {detailedError}
+                   </div>
+                 )}
               </div>
               <div className="text-[10px] text-white/30 font-mono">
                 v2.5.1
