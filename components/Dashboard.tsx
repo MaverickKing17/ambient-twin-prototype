@@ -140,7 +140,7 @@ export const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
         <aside className="lg:col-span-3 space-y-6">
-           <GlassCard title="Asset Inventory" icon={<Icons.Activity />} className="p-0 overflow-hidden">
+           <GlassCard title="Global Asset Inventory" icon={<Icons.Activity />} className="p-0 overflow-hidden">
               <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
                  {isConnecting ? (
                    <div className="p-16 text-center space-y-4 animate-pulse">
@@ -209,7 +209,7 @@ export const Dashboard: React.FC = () => {
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <GlassCard className="border-l-4 border-l-orange-500 shadow-xl bg-gradient-to-br from-orange-600/10 to-transparent">
                        <div className="space-y-6">
-                         <div className="text-orange-400 font-black uppercase tracking-[0.3em] text-[10px]">Active Operation State</div>
+                         <div className="text-orange-400 font-black uppercase tracking-[0.3em] text-[10px]">Current Operational State</div>
                          <h2 className="text-2xl font-black text-white truncate tracking-tight uppercase">{activeDevice.properties.name}</h2>
                          <div className="flex items-baseline gap-3">
                             <span className="text-6xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">{currentReading?.indoorTemp.toFixed(1) || '--'}°</span>
@@ -225,14 +225,18 @@ export const Dashboard: React.FC = () => {
                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div className="lg:col-span-8">
                        <GlassCard title="Mechanical Activity Curve" icon={<Icons.Activity />}>
+                          <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mb-4">Real-Time Heat Exchanger Performance</p>
                           <HeartbeatGraph data={readings} />
                        </GlassCard>
                     </div>
                     <div className="lg:col-span-4 space-y-6">
                        <GlassCard title="Predictive Triage" icon={<Icons.Zap />}>
                           <div className="space-y-6">
+                             <div className="flex flex-col mb-4">
+                               <span className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Asset Stress Level</span>
+                               <p className="text-[9px] text-white/50 font-bold uppercase tracking-tighter mt-1">Mechanical Load Probability Index</p>
+                             </div>
                              <div className="flex justify-between items-end">
-                                <span className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Asset Stress</span>
                                 <span className={`text-4xl font-black tracking-tighter ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-orange-500' : 'text-emerald-400'}`}>
                                   {prediction?.strain_score || '--'}%
                                 </span>
@@ -256,6 +260,10 @@ export const Dashboard: React.FC = () => {
                        ) : (
                           <GlassCard title="Audit Certification" icon={<Icons.ShieldCheck />} variant="mica">
                              <div className="space-y-5">
+                                <div className="flex flex-col">
+                                  <span className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Efficiency Ledger Seal</span>
+                                  <p className="text-[9px] text-white/50 font-bold uppercase tracking-tighter mt-1">For 2026 Rebate Submission</p>
+                                </div>
                                 <p className="text-[11px] text-white leading-relaxed uppercase font-black tracking-[0.2em]">
                                   Finalize immutable efficiency hash for 2026 rebate submission.
                                 </p>
