@@ -23,7 +23,8 @@ const Icons = {
   Cpu: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/></svg>,
   Location: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>,
   Power: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>,
-  Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+  Alert: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
 };
 
 export const Dashboard: React.FC = () => {
@@ -32,15 +33,35 @@ export const Dashboard: React.FC = () => {
   const [prediction, setPrediction] = useState<SystemStrainPrediction | null>(null);
   const [certificate, setCertificate] = useState<EfficiencyCertificate | null>(null);
   const [isMinting, setIsMinting] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
   
   const [devices, setDevices] = useState<SeamDevice[]>([]);
   const [activeDevice, setActiveDevice] = useState<SeamDevice | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [edgeStatus, setEdgeStatus] = useState<'offline' | 'checking' | 'active'>('checking');
 
   useEffect(() => {
     handleConnectProvider(ProviderType.HONEYWELL);
+    checkEdgeStatus();
   }, []);
+
+  const checkEdgeStatus = async () => {
+    if (!supabase) {
+      setEdgeStatus('offline');
+      return;
+    }
+    try {
+      const { error } = await supabase.functions.invoke('hvac-ai-architect', { body: {} });
+      // If the function exists but returned an error (like missing keys inside it), 
+      // we check the specific message. If it says 'not found', the function isn't deployed.
+      if (error && error.message?.includes('not found')) {
+        setEdgeStatus('offline');
+      } else {
+        setEdgeStatus('active');
+      }
+    } catch (e) {
+      setEdgeStatus('offline');
+    }
+  };
 
   const handleConnectProvider = async (provider: ProviderType) => {
     setIsConnecting(true);
@@ -75,36 +96,29 @@ export const Dashboard: React.FC = () => {
     if (supabase) await supabase.auth.signOut();
   };
 
-  const handleSharePortal = () => {
-    const mockHomeId = activeDevice ? `GTA-${activeDevice.device_id.slice(-6).toUpperCase()}` : "DEMO";
-    const url = `${window.location.origin}/#portal/${mockHomeId}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setLinkCopied(true);
-      setTimeout(() => setLinkCopied(false), 2000);
-    });
-  };
-
   const currentReading = readings.length > 0 ? readings[readings.length-1] : null;
 
   return (
     <div className="max-w-[1500px] mx-auto space-y-6 animate-fade-in px-4 py-8">
       
       {/* ENTERPRISE HEADER */}
-      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-5 px-8 bg-[#161d2e] border border-white/5 rounded-lg shadow-2xl">
+      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-5 px-8 bg-[#161d2e] border border-white/5 rounded-lg shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+        
         <div className="flex items-center gap-5">
            <div className="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-900/40">
              <Icons.Cpu />
            </div>
            <div>
-              <h1 className="text-xl font-black text-white tracking-tight uppercase">Ambient Twin <span className="text-blue-400 font-light">Prod.</span></h1>
+              <h1 className="text-xl font-black text-white tracking-tight uppercase">Ambient Twin <span className="text-blue-400 font-light italic">Prod</span></h1>
               <div className="flex items-center gap-4">
                  <div className="flex items-center gap-1.5 text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
                    <Icons.Location />
-                   Toronto HQ
+                   Toronto Operational Center
                  </div>
-                 <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                   <Icons.Lock />
-                   Vault Active (Keys Hidden)
+                 <div className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded border transition-colors ${edgeStatus === 'active' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-orange-400 bg-orange-500/10 border-orange-500/20'}`}>
+                   {edgeStatus === 'active' ? <Icons.Lock /> : <Icons.Alert />}
+                   {edgeStatus === 'active' ? 'Edge Secure' : 'Configuration Pending'}
                  </div>
               </div>
            </div>
@@ -118,12 +132,6 @@ export const Dashboard: React.FC = () => {
             Rebate CRM
           </button>
           <div className="h-6 w-px bg-white/10" />
-          <button 
-              onClick={handleSharePortal}
-              className="px-6 py-2.5 rounded bg-blue-600 hover:bg-blue-500 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-lg"
-            >
-              {linkCopied ? 'Token Copied' : 'Sync Portal'}
-            </button>
           <button onClick={handleLogout} className="text-white/30 hover:text-red-400 transition-colors p-2">
             <Icons.Power />
           </button>
@@ -135,7 +143,7 @@ export const Dashboard: React.FC = () => {
            <GlassCard title="Global Asset Inventory" icon={<Icons.Activity />} className="p-0 overflow-hidden">
               <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
                  {isConnecting ? (
-                   <div className="p-16 text-center space-y-4">
+                   <div className="p-16 text-center space-y-4 animate-pulse">
                       <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
                    </div>
                  ) : (
@@ -158,16 +166,45 @@ export const Dashboard: React.FC = () => {
               </div>
            </GlassCard>
 
-           <div className="p-6 bg-blue-600/10 border border-blue-500/20 rounded-lg">
-              <div className="flex justify-between items-center mb-3">
-                 <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Regional Flux</span>
-                 <span className="text-[10px] font-bold text-blue-400">Toronto, ON</span>
+           {/* UPDATED READINESS PANEL TO MATCH YOUR SCREENSHOT */}
+           <GlassCard title="Technical Readiness" icon={<Icons.Zap />} variant="mica">
+              <div className="space-y-4">
+                 <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                    <span className="text-white/30">Supabase Auth</span>
+                    <span className="text-emerald-400 flex items-center gap-1"><Icons.Check /> Link OK</span>
+                 </div>
+                 
+                 <div className="pt-2 border-t border-white/5 space-y-3">
+                    <p className="text-[9px] text-white/40 uppercase font-black tracking-widest">Required Vault Secrets:</p>
+                    
+                    <div className="flex justify-between items-center text-[10px]">
+                       <code className="text-blue-400">GEMINI_API_KEY</code>
+                       {edgeStatus === 'active' ? (
+                         <span className="text-emerald-400 flex items-center gap-1"><Icons.Check /> Vaulted</span>
+                       ) : (
+                         <span className="text-orange-400 flex items-center gap-1 animate-pulse"><Icons.Alert /> Missing</span>
+                       )}
+                    </div>
+
+                    <div className="flex justify-between items-center text-[10px]">
+                       <code className="text-blue-400">SEAM_API_KEY</code>
+                       {edgeStatus === 'active' ? (
+                         <span className="text-emerald-400 flex items-center gap-1"><Icons.Check /> Vaulted</span>
+                       ) : (
+                         <span className="text-orange-400 flex items-center gap-1 animate-pulse"><Icons.Alert /> Missing</span>
+                       )}
+                    </div>
+                 </div>
+
+                 {edgeStatus !== 'active' && (
+                    <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded">
+                       <p className="text-[9px] text-blue-100/70 leading-relaxed font-medium">
+                         Go to <span className="text-blue-300">Settings &gt; Edge Functions &gt; Secrets</span> and add the keys above to enable AI & Live Device features.
+                       </p>
+                    </div>
+                 )}
               </div>
-              <div className="flex items-baseline gap-2">
-                 <span className="text-3xl font-black text-white">-2°C</span>
-                 <span className="text-[10px] text-blue-400/60 font-black uppercase">Frost Point</span>
-              </div>
-           </div>
+           </GlassCard>
         </aside>
 
         <main className="lg:col-span-9 space-y-6">
@@ -181,10 +218,10 @@ export const Dashboard: React.FC = () => {
            ) : (
               <div className="space-y-6 animate-fade-in">
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <GlassCard className="border-l-4 border-l-blue-500 shadow-xl">
+                    <GlassCard className="border-l-4 border-l-blue-500 shadow-xl bg-gradient-to-br from-blue-600/5 to-transparent">
                        <div className="space-y-6">
-                         <div className="text-blue-400 font-black uppercase tracking-[0.3em] text-[10px]">Active Telemetry</div>
-                         <h2 className="text-2xl font-black text-white truncate tracking-tight">{activeDevice.properties.name}</h2>
+                         <div className="text-blue-400 font-black uppercase tracking-[0.3em] text-[10px]">Real-Time Telemetry</div>
+                         <h2 className="text-2xl font-black text-white truncate tracking-tight uppercase">{activeDevice.properties.name}</h2>
                          <div className="flex items-baseline gap-3">
                             <span className="text-6xl font-black text-white tracking-tighter">{currentReading?.indoorTemp.toFixed(1) || '--'}°</span>
                             <span className="text-white/20 text-xs font-black uppercase tracking-[0.2em]">Celsius</span>
