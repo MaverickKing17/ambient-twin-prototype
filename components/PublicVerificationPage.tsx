@@ -32,96 +32,101 @@ export const PublicVerificationPage: React.FC<Props> = ({ hash }) => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-10 animate-fade-in pb-20">
-      <header className="flex flex-col items-center text-center space-y-6 mb-16">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[11px] font-bold tracking-[0.3em] uppercase">
+    <div className="max-w-6xl mx-auto p-6 space-y-10 animate-fade-in pb-32">
+      <header className="flex flex-col items-center text-center space-y-8 mb-20 pt-10">
+        <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black tracking-[0.4em] uppercase shadow-lg shadow-blue-900/10">
           <Icons.Vault />
           Secure Trust Gateway
         </div>
-        <h1 className="text-5xl font-extrabold text-white tracking-tight leading-tight">Public Asset Verification</h1>
-        <p className="text-slate-300 max-w-2xl text-lg font-normal leading-relaxed">
-          Access high-fidelity telemetry and immutable efficiency certification for the 
-          <span className="text-white font-bold"> primary HVAC asset </span> 
-          at the verified property listed below.
+        <h1 className="text-6xl font-black text-white tracking-tighter leading-none uppercase">Asset Authenticator</h1>
+        <p className="text-slate-400 max-w-2xl text-lg font-medium leading-relaxed">
+          Access the <span className="text-white">blockchain-anchored</span> efficiency certificate for this property's high-performance HVAC infrastructure.
         </p>
       </header>
 
       {isVerifying ? (
-        <div className="flex flex-col items-center py-20 space-y-4">
-           <div className="w-12 h-12 border-4 border-blue-500/10 border-t-blue-500 rounded-full animate-spin"></div>
-           <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Bridging Ledger...</span>
+        <div className="flex flex-col items-center py-24 space-y-6">
+           <div className="w-16 h-16 border-4 border-blue-500/10 border-t-orange-500 rounded-full animate-spin shadow-[0_0_40px_rgba(249,115,22,0.2)]"></div>
+           <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.5em]">Establishing Proof of Origin...</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           
           <div className="lg:col-span-7 space-y-8">
-            <GlassCard variant="mica" className="border-l-4 border-l-blue-500 shadow-2xl">
-              <div className="flex items-center gap-4 mb-10">
-                <div className="p-3 bg-blue-500/10 rounded-lg text-blue-400">
+            <GlassCard variant="mica" className="border-l-4 border-l-orange-500 shadow-2xl bg-white/[0.01]">
+              <div className="flex items-center gap-4 mb-12">
+                <div className="p-4 bg-orange-500/10 rounded-xl text-orange-500 shadow-lg shadow-orange-900/10">
                   <Icons.Home />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white tracking-tight">Technical Identity</h3>
-                  <div className="flex items-center gap-2 text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em]">
+                  <h3 className="text-2xl font-black text-white tracking-tight uppercase">Technical Identity</h3>
+                  <div className="flex items-center gap-2 text-[10px] font-black text-emerald-400 uppercase tracking-[0.25em] mt-1">
                     <Icons.Verified />
-                    Validated Hardware Link
+                    Hardware Handshake Valid
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div>
-                    <label className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black mb-2 block">Verified Property Address</label>
-                    <div className="text-2xl text-white font-bold leading-tight tracking-tight">{mockPublicData.address}</div>
+                    <label className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black mb-3 block">Property Registry</label>
+                    <div className="text-2xl text-white font-black leading-tight tracking-tight uppercase">{mockPublicData.address}</div>
                   </div>
                   <div>
-                    <label className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black mb-2 block">Asset Serial Code</label>
-                    <div className="text-xl text-blue-400 font-mono font-bold tracking-tight">{mockPublicData.serialNumber}</div>
+                    <label className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black mb-3 block">Digital Twin ID</label>
+                    <div className="text-xl text-orange-400 font-mono font-black tracking-tighter uppercase">{mockPublicData.serialNumber}</div>
                   </div>
                 </div>
 
-                <div className="pt-8 border-t border-white/10">
-                  <label className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black mb-3 block">Blockchain Asset Signature (SHA-256)</label>
-                  <div className="bg-black/40 p-5 rounded border border-white/5 font-mono text-[11px] text-slate-400 break-all leading-relaxed">
+                <div className="pt-10 border-t border-white/10">
+                  <label className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-black mb-4 block">Asset Signature (SHA-256)</label>
+                  <div className="bg-black/60 p-6 rounded-lg border border-white/5 font-mono text-[11px] text-slate-500 break-all leading-relaxed shadow-inner">
                     {hash}
                   </div>
                 </div>
               </div>
             </GlassCard>
 
-            <div className="bg-emerald-500/10 border border-emerald-500/20 p-8 rounded flex items-center gap-8 shadow-xl">
-               <div className="h-14 w-14 bg-emerald-500 rounded flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 shrink-0">
+            <div className="bg-emerald-500/10 border border-emerald-500/20 p-10 rounded-xl flex items-center gap-8 shadow-2xl relative overflow-hidden group">
+               <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+               <div className="h-16 w-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-emerald-500/40 shrink-0 transform group-hover:rotate-6 transition-transform">
                   <Icons.Verified />
                </div>
                <div>
-                  <h4 className="text-xl font-bold text-white mb-1">Incentive Eligibility Certified</h4>
-                  <p className="text-sm text-slate-300">Confirmed for <span className="text-white font-bold">{mockPublicData.rebateAmount}</span> via the Enbridge Home Efficiency Rebate Plus program.</p>
+                  <h4 className="text-2xl font-black text-white mb-1 uppercase tracking-tight">Rebate Eligibility Certified</h4>
+                  <p className="text-base text-slate-400">Confirmed for <span className="text-emerald-400 font-black tracking-tight">{mockPublicData.rebateAmount} CAD</span> via Enbridge HER+.</p>
                </div>
             </div>
           </div>
 
           <div className="lg:col-span-5 space-y-8">
-            <GlassCard title="Real-Time Performance" icon={<Icons.Activity />} variant="mica">
-               <div className="space-y-10 py-4">
-                  <div className="flex justify-between items-center py-4 border-b border-white/10">
-                    <span className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Operational Health</span>
-                    <span className="px-4 py-1 bg-emerald-500 text-white text-[10px] font-black uppercase rounded shadow-lg">
+            <GlassCard title="Real-Time Performance" icon={<Icons.Activity />} variant="mica" className="relative">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/10 blur-[60px] pointer-events-none" />
+               <div className="space-y-12 py-6">
+                  <div className="flex justify-between items-center py-5 border-b border-white/10">
+                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em]">Operational Health</span>
+                    <span className="px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-700 text-white text-[10px] font-black uppercase rounded shadow-xl shadow-orange-900/40 tracking-[0.2em] animate-pulse">
                       {mockPublicData.status}
                     </span>
                   </div>
 
-                  <div className="text-center py-8">
-                    <div className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-4">Certified Efficiency Grade</div>
-                    <div className="text-[120px] leading-none font-black text-white tracking-tighter filter drop-shadow-[0_0_30px_rgba(255,255,255,0.25)]">
-                      {mockPublicData.systemGrade}
+                  <div className="text-center py-10 relative">
+                    <div className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] mb-6">Efficiency Performance Rating</div>
+                    <div className="relative inline-block">
+                      <div className="text-[140px] leading-none font-black text-transparent bg-clip-text bg-gradient-to-b from-orange-400 to-orange-700 tracking-tighter filter drop-shadow-[0_20px_40px_rgba(249,115,22,0.4)]">
+                        {mockPublicData.systemGrade}
+                      </div>
                     </div>
-                    <div className="text-xs font-bold text-emerald-400 mt-6 tracking-widest uppercase">Peak Performance Range</div>
+                    <div className="text-[11px] font-black text-orange-400/80 mt-10 tracking-[0.4em] uppercase border-y border-orange-500/20 py-2 inline-block">
+                      Peak Optimization Curve
+                    </div>
                   </div>
 
-                  <div className="bg-white/[0.04] p-5 rounded border border-white/5 text-center">
-                     <p className="text-xs text-slate-300 leading-relaxed">
-                       Dynamic twin data is streamed via encrypted Resideo MQTT. Next update: 54s.
+                  <div className="bg-white/[0.04] p-6 rounded-xl border border-white/5 text-center shadow-inner">
+                     <p className="text-[11px] text-slate-400 leading-relaxed font-bold uppercase tracking-wider">
+                       Telemetry streamed via Secure MQTT.<br/>
+                       <span className="text-orange-500/70">Next cryptographic update: 42s</span>
                      </p>
                   </div>
                </div>
@@ -129,9 +134,9 @@ export const PublicVerificationPage: React.FC<Props> = ({ hash }) => {
             
             <button 
               onClick={() => window.location.hash = ''}
-              className="w-full py-4 text-xs font-bold text-slate-500 hover:text-white transition-all uppercase tracking-[0.3em] text-center border border-transparent hover:border-white/10 rounded"
+              className="w-full py-5 text-[10px] font-black text-slate-500 hover:text-white transition-all uppercase tracking-[0.5em] text-center border border-white/5 hover:border-white/10 rounded-xl bg-white/[0.02]"
             >
-              &larr; Return to Dashboard
+              &larr; Exit Secure Tunnel
             </button>
           </div>
 

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { jsPDF } from "jspdf";
 import { EfficiencyCertificate } from '../types';
@@ -103,123 +104,112 @@ export const EfficiencyCertificateCard: React.FC<Props> = ({ certificate, onUpda
   });
 
   return (
-    <div className="relative w-full overflow-hidden rounded-[4px] p-[1px] bg-gradient-to-br from-white/30 via-white/10 to-transparent shadow-xl group transition-all hover:scale-[1.01] duration-500">
+    <div className="relative w-full overflow-hidden rounded-lg p-[1.5px] bg-gradient-to-br from-orange-400/40 via-white/5 to-transparent shadow-2xl group transition-all hover:scale-[1.01] duration-700">
       
-      {/* Holographic Background Effect - Darker for contrast */}
-      <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-3xl rounded-[3px] z-0" />
+      {/* Metallic Dark Background */}
+      <div className="absolute inset-0 bg-[#0f172a] backdrop-blur-3xl rounded-lg z-0" />
       
-      {/* Iridescent Sheen - Warmer tones */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 via-white/5 to-transparent opacity-40 mix-blend-overlay pointer-events-none" />
-      <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-400/20 rounded-full blur-[80px] pointer-events-none" />
+      {/* Iridescent Energy Wave */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-orange-600/10 via-white/5 to-transparent opacity-60 mix-blend-overlay pointer-events-none" />
+      <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-orange-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute -top-24 -right-24 w-80 h-80 bg-orange-600/20 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Content Container */}
-      <div className="relative z-10 p-6 flex flex-col h-full justify-between min-h-[460px]">
+      <div className="relative z-10 p-6 flex flex-col h-full justify-between min-h-[480px]">
         
         {/* Header */}
         <div className="flex justify-between items-start">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-bold mb-1">Web 3.0 Trust Layer</span>
-            <h3 className="text-xl font-semibold text-white tracking-tight">Efficiency Certificate</h3>
+            <span className="text-[9px] uppercase font-black tracking-[0.3em] text-orange-400/70 mb-1">Diligence Ready Asset</span>
+            <h3 className="text-xl font-black text-white tracking-tight uppercase">Efficiency Ledger</h3>
           </div>
-          {/* Simulated Chip/Hologram - Orange */}
-          <div className="w-12 h-9 rounded-sm bg-gradient-to-br from-orange-200/20 to-orange-600/20 border border-orange-400/30 flex items-center justify-center relative overflow-hidden">
-             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+          {/* Simulated Chip/Hologram - High-End Gold/Orange */}
+          <div className="w-14 h-10 rounded bg-gradient-to-br from-orange-100/30 to-orange-700/40 border border-orange-400/50 flex items-center justify-center relative overflow-hidden shadow-lg shadow-orange-900/20">
+             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30"></div>
              <div className="w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer absolute transform -skew-x-12 translate-x-[-150%]" />
-             <svg className="w-6 h-6 text-orange-400/90" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
+             <svg className="w-7 h-7 text-white/90 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
           </div>
         </div>
 
-        {/* Grade Display */}
-        <div className="flex flex-col items-center justify-center my-6">
-          <div className="relative">
-            <h1 className="text-8xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-orange-200 drop-shadow-[0_0_20px_rgba(249,115,22,0.4)]">
+        {/* PRO GRADE DISPLAY - REFACTORED FOR ORANGE IMPACT */}
+        <div className="flex flex-col items-center justify-center my-8 relative">
+          <div className="absolute -z-10 w-48 h-48 bg-orange-600/20 blur-[60px] rounded-full animate-pulse" />
+          <div className="relative group cursor-default">
+            <h1 className="text-9xl font-black bg-clip-text text-transparent bg-gradient-to-b from-orange-300 via-orange-500 to-orange-700 drop-shadow-[0_15px_35px_rgba(249,115,22,0.6)] tracking-tighter">
               {certificate.grade}
             </h1>
-            <div className="absolute -right-6 top-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-sm">
-              VERIFIED
+            <div className="absolute -right-10 top-4 bg-white text-orange-600 text-[11px] font-black px-3 py-1 rounded shadow-2xl border border-orange-200 transform rotate-6 scale-110">
+              ELITE
             </div>
           </div>
-          <div className="mt-2 text-sm text-white/60 font-medium">
-            Score: {certificate.efficiencyScore}/100
+          <div className="mt-4 flex items-center gap-3">
+             <div className="h-px w-8 bg-orange-500/30" />
+             <div className="text-[12px] text-orange-200 font-black tracking-[0.2em] uppercase">
+               Score: {certificate.efficiencyScore}.0
+             </div>
+             <div className="h-px w-8 bg-orange-500/30" />
           </div>
         </div>
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="bg-white/5 rounded-sm p-3 border border-white/10 flex flex-col items-center backdrop-blur-sm">
-            <span className="text-[10px] text-white/50 uppercase tracking-wider font-bold">SEER2</span>
-            <span className="text-xl font-bold text-white">{certificate.metrics.seer2}</span>
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-white/[0.03] rounded border border-white/10 p-3 flex flex-col items-center backdrop-blur-xl group-hover:border-orange-500/30 transition-colors">
+            <span className="text-[9px] text-white/40 uppercase tracking-[0.2em] font-black mb-1">Standard SEER2</span>
+            <span className="text-2xl font-black text-white">{certificate.metrics.seer2}</span>
           </div>
-          <div className="bg-white/5 rounded-sm p-3 border border-white/10 flex flex-col items-center backdrop-blur-sm">
-            <span className="text-[10px] text-white/50 uppercase tracking-wider font-bold">HSPF2</span>
-            <span className="text-xl font-bold text-white">{certificate.metrics.hspf2}</span>
+          <div className="bg-white/[0.03] rounded border border-white/10 p-3 flex flex-col items-center backdrop-blur-xl group-hover:border-orange-500/30 transition-colors">
+            <span className="text-[9px] text-white/40 uppercase tracking-[0.2em] font-black mb-1">HSPF2 Rating</span>
+            <span className="text-2xl font-black text-white">{certificate.metrics.hspf2}</span>
           </div>
         </div>
 
-        {/* Enbridge Badge */}
-        <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-sm p-3 mb-6">
-          <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center shadow-md">
-             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/></svg>
+        {/* Performance Banner */}
+        <div className="flex items-center gap-4 bg-orange-600/10 border border-orange-500/20 rounded p-4 mb-8">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/40">
+             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-bold text-white">Enbridge Certified</span>
-            <span className="text-[10px] text-white/60">Eligible for $12k Rebate</span>
+            <span className="text-[11px] font-black text-white uppercase tracking-wider">Enbridge Rebate Certified</span>
+            <span className="text-[10px] text-orange-200/80 font-bold">Tier 1 Status: $12,000 Verified</span>
           </div>
         </div>
 
-        {/* Footer / Hash / Publish */}
-        <div className="space-y-4 border-t border-white/10 pt-4">
-          
-          <div className="flex justify-between items-end text-[10px] font-mono text-white/40">
+        {/* Footer */}
+        <div className="space-y-5 border-t border-white/10 pt-5">
+          <div className="flex justify-between items-center text-[9px] font-mono text-white/30 tracking-tight">
             <div className="flex flex-col gap-1 max-w-[65%]">
-              <span className="uppercase tracking-widest text-white/20 font-bold">Asset Hash</span>
-              <span className="break-all leading-tight">{certificate.assetHash}</span>
+              <span className="uppercase text-[8px] tracking-[0.2em] text-white/20 font-black">Node Signature</span>
+              <span className="break-all opacity-50">{certificate.assetHash}</span>
             </div>
-            <div className="flex flex-col gap-1 text-right">
-              <span className="uppercase tracking-widest text-white/20 font-bold">Timestamp</span>
-              <span>{formattedDate}</span>
+            <div className="text-right">
+              <span className="uppercase text-[8px] tracking-[0.2em] text-white/20 font-black block mb-1">Vault Sync</span>
+              <span className="text-white/50">{formattedDate}</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between bg-black/20 rounded-sm p-2 gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-white/70 ml-1 font-medium">Homeowner View</span>
-              {certificate.isPublished ? (
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => window.location.hash = `verify/${certificate.assetHash}`}
-                    className="text-xs text-orange-400 hover:text-orange-300 underline underline-offset-2 transition-colors font-semibold cursor-pointer bg-transparent border-none p-0"
-                  >
-                    View Public URL
-                  </button>
-                  <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)] animate-pulse"></div>
-                </div>
-              ) : (
-                <button 
-                  onClick={handleTogglePublish}
-                  disabled={isPublishing}
-                  className={`
-                    relative inline-flex h-5 w-10 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900
-                    ${isPublishing ? 'opacity-50 cursor-wait' : 'cursor-pointer'}
-                    bg-white/10 hover:bg-white/20
-                  `}
-                >
-                  <span className="sr-only">Publish</span>
-                  <span className="inline-block h-3 w-3 transform rounded-full bg-white transition-transform translate-x-1" />
-                </button>
-              )}
-            </div>
-
-            {/* Realtor Button */}
+          <div className="flex items-center justify-between gap-3">
             <button
               onClick={generateRealtorPDF}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-white/10 hover:bg-orange-500 hover:text-white border border-white/10 text-[10px] uppercase font-bold tracking-wider text-white transition-all"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded bg-white/[0.05] hover:bg-orange-600 text-[10px] uppercase font-black tracking-[0.2em] text-white transition-all border border-white/5 hover:border-orange-400 active:scale-95"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Share with Realtor
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export Addendum
+            </button>
+            
+            <button 
+              onClick={handleTogglePublish}
+              disabled={isPublishing}
+              className={`
+                px-4 py-3 rounded text-[10px] uppercase font-black tracking-[0.2em] transition-all border
+                ${certificate.isPublished 
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                  : 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-900/30'}
+                ${isPublishing ? 'opacity-50 cursor-wait' : 'cursor-pointer active:scale-95'}
+              `}
+            >
+              {isPublishing ? '...' : certificate.isPublished ? 'Synced' : 'Go Public'}
             </button>
           </div>
-
         </div>
       </div>
     </div>

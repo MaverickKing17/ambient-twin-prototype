@@ -51,8 +51,6 @@ export const Dashboard: React.FC = () => {
     }
     try {
       const { error } = await supabase.functions.invoke('hvac-ai-architect', { body: {} });
-      // If the function exists but returned an error (like missing keys inside it), 
-      // we check the specific message. If it says 'not found', the function isn't deployed.
       if (error && error.message?.includes('not found')) {
         setEdgeStatus('offline');
       } else {
@@ -103,32 +101,32 @@ export const Dashboard: React.FC = () => {
       
       {/* ENTERPRISE HEADER */}
       <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-5 px-8 bg-[#161d2e] border border-white/5 rounded-lg shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
         
         <div className="flex items-center gap-5">
-           <div className="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-900/40">
+           <div className="h-10 w-10 rounded-lg bg-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/40">
              <Icons.Cpu />
            </div>
            <div>
-              <h1 className="text-xl font-black text-white tracking-tight uppercase">Ambient Twin <span className="text-blue-400 font-light italic">Prod</span></h1>
+              <h1 className="text-xl font-black text-white tracking-tight uppercase">Ambient Twin <span className="text-orange-400 font-light italic">Core</span></h1>
               <div className="flex items-center gap-4">
                  <div className="flex items-center gap-1.5 text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
                    <Icons.Location />
                    Toronto Operational Center
                  </div>
-                 <div className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded border transition-colors ${edgeStatus === 'active' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-orange-400 bg-orange-500/10 border-orange-500/20'}`}>
+                 <div className={`flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded border transition-colors ${edgeStatus === 'active' ? 'text-orange-400 bg-orange-500/10 border-orange-500/20' : 'text-slate-400 bg-white/5 border-white/10'}`}>
                    {edgeStatus === 'active' ? <Icons.Lock /> : <Icons.Alert />}
-                   {edgeStatus === 'active' ? 'Edge Secure' : 'Configuration Pending'}
+                   {edgeStatus === 'active' ? 'Vault Secure' : 'Sandbox Mode'}
                  </div>
               </div>
            </div>
         </div>
 
         <nav className="flex items-center gap-8 mt-6 lg:mt-0">
-          <button onClick={() => setActiveTab('twin')} className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === 'twin' ? 'text-white border-b-2 border-blue-500' : 'text-white/40 hover:text-white/70'}`}>
+          <button onClick={() => setActiveTab('twin')} className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === 'twin' ? 'text-white border-b-2 border-orange-500' : 'text-white/40 hover:text-white/70'}`}>
             Operations
           </button>
-          <button onClick={() => setActiveTab('leads')} className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === 'leads' ? 'text-white border-b-2 border-blue-500' : 'text-white/40 hover:text-white/70'}`}>
+          <button onClick={() => setActiveTab('leads')} className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === 'leads' ? 'text-white border-b-2 border-orange-500' : 'text-white/40 hover:text-white/70'}`}>
             Rebate CRM
           </button>
           <div className="h-6 w-px bg-white/10" />
@@ -144,21 +142,21 @@ export const Dashboard: React.FC = () => {
               <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
                  {isConnecting ? (
                    <div className="p-16 text-center space-y-4 animate-pulse">
-                      <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                      <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />
                    </div>
                  ) : (
                    devices.map((d) => (
                     <button
                       key={d.device_id}
                       onClick={() => { setActiveDevice(d); loadDeviceData(d); }}
-                      className={`w-full p-5 border-b border-white/5 text-left transition-all flex items-center justify-between group ${activeDevice?.device_id === d.device_id ? 'bg-blue-600/10 border-l-[6px] border-l-blue-500' : 'hover:bg-white/[0.02]'}`}
+                      className={`w-full p-5 border-b border-white/5 text-left transition-all flex items-center justify-between group ${activeDevice?.device_id === d.device_id ? 'bg-orange-600/10 border-l-[6px] border-l-orange-500' : 'hover:bg-white/[0.02]'}`}
                     >
                        <div>
-                          <span className="block text-[12px] font-bold text-white tracking-wide">{d.properties.name}</span>
+                          <span className="block text-[12px] font-bold text-white tracking-wide uppercase">{d.properties.name}</span>
                           <span className="text-[9px] text-white/20 font-mono tracking-tighter uppercase">{d.device_id.slice(-12)}</span>
                        </div>
-                       <div className={`px-2 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-tighter ${d.properties.online ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                         {d.properties.online ? 'Synced' : 'Critical'}
+                       <div className={`px-2 py-0.5 rounded-[2px] text-[8px] font-black uppercase tracking-tighter ${d.properties.online ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                         {d.properties.online ? 'Online' : 'Downtime'}
                        </div>
                     </button>
                    ))
@@ -166,43 +164,32 @@ export const Dashboard: React.FC = () => {
               </div>
            </GlassCard>
 
-           {/* UPDATED READINESS PANEL TO MATCH YOUR SCREENSHOT */}
            <GlassCard title="Technical Readiness" icon={<Icons.Zap />} variant="mica">
               <div className="space-y-4">
                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
-                    <span className="text-white/30">Supabase Auth</span>
-                    <span className="text-emerald-400 flex items-center gap-1"><Icons.Check /> Link OK</span>
+                    <span className="text-white/30">Supabase Tunnel</span>
+                    <span className="text-orange-400 flex items-center gap-1"><Icons.Check /> Linked</span>
                  </div>
                  
                  <div className="pt-2 border-t border-white/5 space-y-3">
-                    <p className="text-[9px] text-white/40 uppercase font-black tracking-widest">Required Vault Secrets:</p>
-                    
+                    <p className="text-[9px] text-white/40 uppercase font-black tracking-widest">Vaulted API Secrets:</p>
                     <div className="flex justify-between items-center text-[10px]">
-                       <code className="text-blue-400">GEMINI_API_KEY</code>
+                       <code className="text-orange-300">GEMINI_AI</code>
                        {edgeStatus === 'active' ? (
-                         <span className="text-emerald-400 flex items-center gap-1"><Icons.Check /> Vaulted</span>
+                         <span className="text-emerald-400 flex items-center gap-1"><Icons.Check /> Verified</span>
                        ) : (
-                         <span className="text-orange-400 flex items-center gap-1 animate-pulse"><Icons.Alert /> Missing</span>
+                         <span className="text-orange-400 flex items-center gap-1 animate-pulse"><Icons.Alert /> Pending</span>
                        )}
                     </div>
-
                     <div className="flex justify-between items-center text-[10px]">
-                       <code className="text-blue-400">SEAM_API_KEY</code>
+                       <code className="text-orange-300">SEAM_IOT</code>
                        {edgeStatus === 'active' ? (
-                         <span className="text-emerald-400 flex items-center gap-1"><Icons.Check /> Vaulted</span>
+                         <span className="text-emerald-400 flex items-center gap-1"><Icons.Check /> Verified</span>
                        ) : (
-                         <span className="text-orange-400 flex items-center gap-1 animate-pulse"><Icons.Alert /> Missing</span>
+                         <span className="text-orange-400 flex items-center gap-1 animate-pulse"><Icons.Alert /> Pending</span>
                        )}
                     </div>
                  </div>
-
-                 {edgeStatus !== 'active' && (
-                    <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded">
-                       <p className="text-[9px] text-blue-100/70 leading-relaxed font-medium">
-                         Go to <span className="text-blue-300">Settings &gt; Edge Functions &gt; Secrets</span> and add the keys above to enable AI & Live Device features.
-                       </p>
-                    </div>
-                 )}
               </div>
            </GlassCard>
         </aside>
@@ -213,17 +200,17 @@ export const Dashboard: React.FC = () => {
                  <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center text-white/10 mb-6 animate-pulse">
                     <Icons.Cpu />
                  </div>
-                 <h2 className="text-sm font-black text-white/20 uppercase tracking-[0.5em]">Awaiting Uplink</h2>
+                 <h2 className="text-sm font-black text-white/20 uppercase tracking-[0.5em]">Establishing Uplink</h2>
               </GlassCard>
            ) : (
               <div className="space-y-6 animate-fade-in">
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <GlassCard className="border-l-4 border-l-blue-500 shadow-xl bg-gradient-to-br from-blue-600/5 to-transparent">
+                    <GlassCard className="border-l-4 border-l-orange-500 shadow-xl bg-gradient-to-br from-orange-600/5 to-transparent">
                        <div className="space-y-6">
-                         <div className="text-blue-400 font-black uppercase tracking-[0.3em] text-[10px]">Real-Time Telemetry</div>
+                         <div className="text-orange-400 font-black uppercase tracking-[0.3em] text-[10px]">Current Operational State</div>
                          <h2 className="text-2xl font-black text-white truncate tracking-tight uppercase">{activeDevice.properties.name}</h2>
                          <div className="flex items-baseline gap-3">
-                            <span className="text-6xl font-black text-white tracking-tighter">{currentReading?.indoorTemp.toFixed(1) || '--'}°</span>
+                            <span className="text-6xl font-black text-white tracking-tighter drop-shadow-lg">{currentReading?.indoorTemp.toFixed(1) || '--'}°</span>
                             <span className="text-white/20 text-xs font-black uppercase tracking-[0.2em]">Celsius</span>
                          </div>
                        </div>
@@ -235,26 +222,26 @@ export const Dashboard: React.FC = () => {
 
                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div className="lg:col-span-8">
-                       <GlassCard title="Spectral Analysis Curve" icon={<Icons.Activity />}>
+                       <GlassCard title="Mechanical Activity Curve" icon={<Icons.Activity />}>
                           <HeartbeatGraph data={readings} />
                        </GlassCard>
                     </div>
                     <div className="lg:col-span-4 space-y-6">
-                       <GlassCard title="Predictive Triage Engine" icon={<Icons.Zap />}>
+                       <GlassCard title="Predictive Triage" icon={<Icons.Zap />}>
                           <div className="space-y-6">
                              <div className="flex justify-between items-end">
-                                <span className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em]">Mechanical Strain</span>
-                                <span className={`text-4xl font-black tracking-tighter ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-orange-400' : 'text-emerald-400'}`}>
+                                <span className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em]">Asset Stress</span>
+                                <span className={`text-4xl font-black tracking-tighter ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-orange-500' : 'text-emerald-400'}`}>
                                   {prediction?.strain_score || '--'}%
                                 </span>
                              </div>
                              <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-500 transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.5)]" style={{ width: `${prediction?.strain_score || 0}%` }} />
+                                <div className="h-full bg-orange-500 transition-all duration-1000 shadow-[0_0_10px_rgba(249,115,22,0.5)]" style={{ width: `${prediction?.strain_score || 0}%` }} />
                              </div>
                              <div className="pt-2 flex flex-col gap-3">
                                 {prediction?.recommendations.slice(0, 2).map((r, i) => (
                                   <div key={i} className="text-[11px] text-white/60 leading-relaxed flex items-start gap-4 bg-white/[0.03] p-3 rounded border border-white/5">
-                                    <div className="mt-1 text-emerald-400"><Icons.Check /></div>
+                                    <div className="mt-1 text-orange-400"><Icons.Check /></div>
                                     {r}
                                   </div>
                                 ))}
@@ -265,10 +252,10 @@ export const Dashboard: React.FC = () => {
                        {certificate ? (
                           <EfficiencyCertificateCard certificate={certificate} onUpdate={setCertificate} />
                        ) : (
-                          <GlassCard title="Ledger Verification" icon={<Icons.ShieldCheck />} variant="mica">
+                          <GlassCard title="Audit Certification" icon={<Icons.ShieldCheck />} variant="mica">
                              <div className="space-y-5">
                                 <p className="text-[11px] text-white/40 leading-relaxed uppercase font-black tracking-[0.2em]">
-                                  Generate immutable asset hash for Enbridge HER+ compliance.
+                                  Finalize immutable efficiency hash for 2026 rebate submission.
                                 </p>
                                 <button 
                                   onClick={() => {
@@ -279,9 +266,9 @@ export const Dashboard: React.FC = () => {
                                         setIsMinting(false);
                                      }).catch(() => setIsMinting(false));
                                   }}
-                                  className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded text-[11px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-xl active:scale-[0.98]"
+                                  className="w-full py-4 bg-orange-600 hover:bg-orange-500 rounded text-[11px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-xl active:scale-[0.98] border border-orange-400/20"
                                 >
-                                  {isMinting ? 'Hashing Node...' : 'Mint Certificate'}
+                                  {isMinting ? 'Validating...' : 'Mint Verified Certificate'}
                                 </button>
                              </div>
                           </GlassCard>
