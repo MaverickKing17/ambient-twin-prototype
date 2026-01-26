@@ -30,15 +30,15 @@ export class SeamService {
   }
 
   /**
-   * LIST DEVICES (Real API Call)
+   * LIST DEVICES (Real API Call or Simulation)
    * Fetches the actual Sandbox devices you created in the Seam Console.
    */
-  public async listDevices(accessToken: string): Promise<SeamDevice[]> {
+  public async listDevices(accessToken: string, providerHint?: ProviderType): Promise<SeamDevice[]> {
     
     // 1. Fallback: If user hasn't set up the key, use Virtual Twin immediately.
     if (accessToken.includes('PASTE_YOUR_KEY_HERE') || !accessToken) {
       console.warn("Seam API Key is missing. activating Virtual Twin Mode.");
-      return this.getMockDevice();
+      return this.getMockDevice(providerHint);
     }
 
     try {
@@ -62,7 +62,7 @@ export class SeamService {
       // 2. Fallback: If Key is valid but Sandbox is empty, use Virtual Twin.
       if (data.devices.length === 0) {
         console.warn("No devices found in Seam Sandbox. Activating Virtual Twin Mode.");
-        return this.getMockDevice();
+        return this.getMockDevice(providerHint);
       }
       
       // Transform Seam API response to our Dashboard Type
@@ -84,7 +84,7 @@ export class SeamService {
 
     } catch (error) {
       console.error("Failed to fetch Seam devices, falling back to mock:", error);
-      return this.getMockDevice(); 
+      return this.getMockDevice(providerHint); 
     }
   }
 
@@ -153,12 +153,13 @@ export class SeamService {
   /**
    * Helper: Returns a virtual device to unblock the UI if Seam is empty/unconfigured.
    */
-  private getMockDevice(): SeamDevice[] {
+  private getMockDevice(provider: ProviderType = ProviderType.NEST): SeamDevice[] {
+    const isEcobee = provider === ProviderType.ECOBEE;
     return [{
-      device_id: "mock_nest_twin_01",
-      device_type: "nest_thermostat",
+      device_id: `mock_${provider}_twin_01`,
+      device_type: isEcobee ? "ecobee_thermostat" : "nest_thermostat",
       properties: {
-        name: "Virtual Nest Twin",
+        name: isEcobee ? "Virtual Ecobee Twin" : "Virtual Nest Twin",
         online: true,
         current_climate_setting: {
           hvac_mode_setting: HvacMode.HEAT,

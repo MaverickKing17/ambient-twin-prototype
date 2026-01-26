@@ -38,6 +38,9 @@ export const Dashboard: React.FC = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [hasNoDevices, setHasNoDevices] = useState(false);
 
+  // Check if we are in Demo Mode (No real API key)
+  const isDemoMode = SEAM_API_KEY.includes('PASTE_YOUR_KEY');
+
   // ENTERPRISE LOGIC: Check for Seam Callback Parameters on Load
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -59,7 +62,7 @@ export const Dashboard: React.FC = () => {
     setIsConnecting(true);
     setHasNoDevices(false);
     try {
-      const devices = await seamService.listDevices(token);
+      const devices = await seamService.listDevices(token, provider);
       if (devices.length > 0) {
         setActiveDevice(devices[0]);
         await loadDeviceData(devices[0]);
@@ -147,8 +150,8 @@ export const Dashboard: React.FC = () => {
              <h1 className="text-3xl font-semibold text-white tracking-tight">
                Digital Twin Dashboard
              </h1>
-             <span className="px-2 py-0.5 rounded text-[10px] bg-orange-500/10 border border-orange-500/20 text-orange-400 font-bold uppercase tracking-wider">
-               Sandbox Mode
+             <span className={`px-2 py-0.5 rounded text-[10px] border font-bold uppercase tracking-wider ${isDemoMode ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-orange-500/10 border-orange-500/20 text-orange-400'}`}>
+               {isDemoMode ? 'Simulator Mode' : 'Sandbox Mode'}
              </span>
           </div>
           <div className="mt-2 flex items-center gap-3 flex-wrap">
@@ -159,14 +162,14 @@ export const Dashboard: React.FC = () => {
                   disabled={isConnecting}
                   className="px-4 py-1.5 rounded-sm bg-white/5 hover:bg-orange-500 hover:text-white border border-white/20 text-xs font-semibold uppercase tracking-wide transition-all flex items-center gap-2"
                 >
-                   {isConnecting ? 'Connecting...' : 'Connect Ecobee (Sandbox)'}
+                   {isConnecting ? 'Loading...' : (isDemoMode ? 'Simulate Ecobee' : 'Connect Ecobee')}
                 </button>
                 <button 
                    onClick={() => handleConnectProvider(ProviderType.NEST)}
                    disabled={isConnecting}
                    className="px-4 py-1.5 rounded-sm bg-white/5 hover:bg-orange-500 hover:text-white border border-white/20 text-xs font-semibold uppercase tracking-wide transition-all flex items-center gap-2"
                 >
-                   {isConnecting ? 'Connecting...' : 'Connect Nest (Sandbox)'}
+                   {isConnecting ? 'Loading...' : (isDemoMode ? 'Simulate Nest' : 'Connect Nest')}
                 </button>
               </div>
             ) : (
@@ -213,7 +216,11 @@ export const Dashboard: React.FC = () => {
             </div>
             <h2 className="text-xl font-bold text-white mb-2">Connect System to Twin</h2>
             <p className="text-white/70 mb-6 font-light">
-              Link a <span className="text-white font-semibold">Real Device</span> or a <span className="text-white font-semibold">Seam Virtual Sandbox</span> to begin telemetry ingestion and system strain analysis.
+              {isDemoMode ? (
+                 <span>Launch a <span className="text-white font-semibold">Virtual Simulator</span> to visualize system telemetry and predict failure points without external hardware.</span>
+              ) : (
+                 <span>Link a <span className="text-white font-semibold">Real Device</span> or a <span className="text-white font-semibold">Seam Virtual Sandbox</span> to begin telemetry ingestion.</span>
+              )}
             </p>
             <div className="text-[10px] text-white/30 uppercase tracking-widest mt-4">
               Powered by Seam API
