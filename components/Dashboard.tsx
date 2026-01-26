@@ -4,7 +4,7 @@ import { GlassCard } from './GlassCard';
 import { HeartbeatGraph } from './HeartbeatGraph';
 import { EfficiencyCertificateCard } from './EfficiencyCertificateCard';
 import { generateEfficiencyCertificate } from '../services/ledgerService';
-import { seamService } from '../services/seamService';
+import { seamService, SEAM_API_KEY } from '../services/seamService';
 import { xanoService } from '../services/xanoService';
 import { 
   SystemStrainPrediction, 
@@ -67,21 +67,12 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  // 1. Handle Connecting to Seam (The "Connect" Flow)
+  // 1. Handle Connecting to Seam (Instant Sandbox Mode)
   const handleConnectProvider = async (provider: ProviderType) => {
     setIsConnecting(true);
-    try {
-      // Step A: Get the Webview URL (Calls Seam/Xano)
-      const connectUrl = await seamService.createConnectWebview(provider);
-      
-      // Step B: Redirect User to Seam (In a real app, this is a window.location.href)
-      // For this demo structure, the service returns a self-link with params to simulate the callback.
-      window.location.href = connectUrl;
-      
-    } catch (error) {
-      console.error("Seam Connection Failed:", error);
-      setIsConnecting(false);
-    }
+    // Instant Connect: We bypass the redirect loop because we are in Sandbox Mode
+    // and we already possess the valid SEER_API_KEY.
+    await initializeSession(provider, SEAM_API_KEY);
   };
 
   // 2. Load Data from Backend (Xano) + Seam Telemetry

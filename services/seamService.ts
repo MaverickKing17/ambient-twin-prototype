@@ -10,7 +10,7 @@ import { ProviderType, SeamDevice, TelemetryReading, HvacMode } from '../types';
  * WARNING: In Production (Phase 2), this key moves to Xano (Backend). 
  * Do not commit this file to public GitHub with the key inside.
  */
-const SEAM_API_KEY = 'seam_test8bGn_CEMx5rGHRKB8TmCuCpPzp8K2'; 
+export const SEAM_API_KEY = 'seam_test8bGn_CEMx5rGHRKB8TmCuCpPzp8K2'; 
 const SEAM_ENDPOINT = 'https://connect.getseam.com';
 
 export class SeamService {
