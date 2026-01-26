@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { GlassCard } from './GlassCard';
 import { HeartbeatGraph } from './HeartbeatGraph';
 import { EfficiencyCertificateCard } from './EfficiencyCertificateCard';
+import { AISystemArchitect } from './AISystemArchitect';
 import { generateEfficiencyCertificate } from '../services/ledgerService';
 import { seamService, SEAM_API_KEY } from '../services/seamService';
 import { supabaseService } from '../services/supabaseService'; 
@@ -16,18 +17,14 @@ import {
 } from '../types';
 
 const Icons = {
-  Activity: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
-  Zap: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
-  Award: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>,
-  ShieldCheck: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>,
-  Link: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+  Activity: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+  Zap: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+  ShieldCheck: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>,
   Share: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>,
   Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
-  Copy: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>,
-  Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-  Info: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
-  Terminal: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>,
-  Cpu: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/></svg>
+  Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+  Cpu: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/></svg>,
+  Location: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
 };
 
 export const Dashboard: React.FC = () => {
@@ -39,7 +36,6 @@ export const Dashboard: React.FC = () => {
   const [linkCopied, setLinkCopied] = useState(false);
   const [leads, setLeads] = useState<SalesLead[]>([]);
   
-  // Fleet State
   const [devices, setDevices] = useState<SeamDevice[]>([]);
   const [activeDevice, setActiveDevice] = useState<SeamDevice | null>(null);
   const [connectedProvider, setConnectedProvider] = useState<ProviderType | null>(null);
@@ -56,13 +52,12 @@ export const Dashboard: React.FC = () => {
     if (activeTab === 'leads') refreshLeads();
   }, [activeTab, refreshLeads]);
 
-  // If we already have a key or we're in demo mode, auto-fetch to make it feel seamless
   useEffect(() => {
     if (isDemoMode) {
-      // Small delay to feel like a real scan
-      setTimeout(() => {
+      const timer = setTimeout(() => {
          handleConnectProvider(ProviderType.HONEYWELL);
-      }, 1000);
+      }, 800);
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -73,7 +68,6 @@ export const Dashboard: React.FC = () => {
       const discoveredDevices = await seamService.listDevices(token, provider);
       setDevices(discoveredDevices);
       if (discoveredDevices.length > 0) {
-        // Automatically pick the first online device if possible
         const firstOnline = discoveredDevices.find(d => d.properties.online) || discoveredDevices[0];
         setActiveDevice(firstOnline);
         await loadDeviceData(firstOnline);
@@ -110,194 +104,198 @@ export const Dashboard: React.FC = () => {
     loadDeviceData(device);
   };
 
-  const updateStatus = async (address: string, newStatus: SalesLead['status']) => {
-    const success = await supabaseService.updateLeadStatus(address, newStatus);
-    if (success) refreshLeads();
+  const handleSharePortal = () => {
+    const mockHomeId = activeDevice ? `GTA-${activeDevice.device_id.slice(-6).toUpperCase()}` : "DEMO";
+    const url = `${window.location.origin}/#portal/${mockHomeId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    });
   };
 
   const currentTemp = readings.length > 0 ? readings[readings.length-1].indoorTemp.toFixed(1) : '--';
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-             <h1 className="text-3xl font-semibold text-white tracking-tight">
-               Ambient Command Center
-             </h1>
-             <span className={`px-2 py-0.5 rounded text-[10px] border font-bold uppercase tracking-wider ${isDemoMode ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-orange-500/10 border-orange-500/20 text-orange-400'}`}>
-               {isDemoMode ? 'Fleet Sync Success' : 'Production Active'}
-             </span>
+    <div className="max-w-[1600px] mx-auto space-y-8 animate-fade-in">
+      
+      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center p-8 bg-white/[0.02] border border-white/5 rounded-2xl backdrop-blur-xl">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-4">
+             <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.3)]">
+               <Icons.Cpu />
+             </div>
+             <div>
+                <h1 className="text-2xl font-black text-white tracking-tight uppercase">Ambient Twin <span className="text-orange-500">Pro</span></h1>
+                <div className="flex items-center gap-2 text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">
+                  <Icons.Location />
+                  Greater Toronto Operations
+                </div>
+             </div>
           </div>
-          
-          <nav className="flex items-center gap-4 mt-4">
-            <button 
-              onClick={() => setActiveTab('twin')}
-              className={`text-xs font-bold uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'twin' ? 'border-orange-500 text-white' : 'border-transparent text-white/40 hover:text-white/60'}`}
-            >
-              System Analytics
-            </button>
-            <button 
-              onClick={() => setActiveTab('leads')}
-              className={`text-xs font-bold uppercase tracking-widest pb-1 border-b-2 transition-all flex items-center gap-2 ${activeTab === 'leads' ? 'border-orange-500 text-white' : 'border-transparent text-white/40 hover:text-white/60'}`}
-            >
-              HVAC Sales Pipeline
-              {leads.length > 0 && <span className="bg-orange-500 text-white text-[8px] px-1.5 py-0.5 rounded-full">{leads.filter(l => l.status === 'new').length}</span>}
-            </button>
-          </nav>
         </div>
+
+        <nav className="flex items-center gap-8 mt-6 lg:mt-0">
+          <button 
+            onClick={() => setActiveTab('twin')}
+            className={`text-xs font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === 'twin' ? 'text-white' : 'text-white/30 hover:text-white/60'}`}
+          >
+            System Twin
+            {activeTab === 'twin' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 rounded-full" />}
+          </button>
+          <button 
+            onClick={() => setActiveTab('leads')}
+            className={`text-xs font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === 'leads' ? 'text-white' : 'text-white/30 hover:text-white/60'}`}
+          >
+            Pipeline
+            {activeTab === 'leads' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 rounded-full" />}
+          </button>
+          <div className="h-6 w-px bg-white/10 mx-2" />
+          {activeDevice && (
+            <button 
+              onClick={handleSharePortal}
+              className="px-6 py-3 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all shadow-xl"
+            >
+              {linkCopied ? 'Link Copied' : 'Share Homeowner Portal'}
+            </button>
+          )}
+        </nav>
       </header>
 
-      {activeTab === 'leads' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* CRM UI remains same */}
-          <div className="lg:col-span-1">
-             <GlassCard title="Magic Link Generator" icon={<Icons.Zap />}>
-                <div className="py-4 text-center text-white/40 text-xs">Generating secure portal links...</div>
-             </GlassCard>
-          </div>
-          <div className="lg:col-span-2">
-            <GlassCard title="Active Leads CRM" icon={<Icons.Users />}>
-               <div className="py-20 text-center text-white/20 uppercase tracking-widest text-xs">Awaiting data sync...</div>
-            </GlassCard>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          {/* LEFT COLUMN: FLEET LIST */}
-          <div className="lg:col-span-3 space-y-4">
-             <GlassCard title="Honeywell Fleet" icon={<Icons.Cpu />}>
-                <div className="space-y-2">
-                   {devices.map((d) => (
-                      <button
-                        key={d.device_id}
-                        onClick={() => switchDevice(d)}
-                        className={`w-full p-3 rounded text-left transition-all border flex items-center justify-between group ${activeDevice?.device_id === d.device_id ? 'bg-orange-500/20 border-orange-500/50' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}
-                      >
-                         <div className="flex flex-col">
-                            <span className="text-xs font-bold text-white uppercase tracking-wider">{d.properties.name}</span>
-                            <span className="text-[9px] text-white/40 font-mono">{d.device_id.substring(0,12)}</span>
-                         </div>
-                         <div className={`w-2 h-2 rounded-full ${d.properties.online ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-red-500'}`}></div>
-                      </button>
-                   ))}
-                   {devices.length === 0 && !isConnecting && (
-                      <div className="py-8 text-center text-white/20 text-[10px] uppercase font-bold tracking-widest">No devices detected</div>
-                   )}
-                   {isConnecting && (
-                      <div className="py-8 flex flex-col items-center gap-2">
-                         <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                         <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Scanning...</span>
-                      </div>
-                   )}
-                </div>
-             </GlassCard>
-
-             <GlassCard className="bg-gradient-to-br from-orange-500/10 to-transparent">
-                <div className="flex items-start gap-3">
-                   <div className="text-orange-400 mt-1"><Icons.Info /></div>
-                   <div className="space-y-2">
-                      <h4 className="text-[11px] font-bold text-white uppercase tracking-widest">Fleet Summary</h4>
-                      <p className="text-[10px] text-white/60 leading-normal">
-                         Currently managing <span className="text-white font-bold">{devices.length} assets</span>. 
-                         <span className="text-emerald-400 font-bold ml-1">{devices.filter(d => d.properties.online).length} online</span>.
-                      </p>
-                   </div>
-                </div>
-             </GlassCard>
-          </div>
-
-          {/* RIGHT COLUMN: ACTIVE TWIN DETAIL */}
-          <div className="lg:col-span-9 space-y-6">
-             {!activeDevice ? (
-                <GlassCard className="flex flex-col items-center justify-center py-40">
-                   <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-orange-400 mb-4 animate-pulse">
-                      <Icons.Activity />
-                   </div>
-                   <h2 className="text-xl font-bold text-white mb-2 uppercase tracking-widest">Select an Asset</h2>
-                   <p className="text-white/40 text-xs">Initialize Digital Twin telemetry by selecting a device from your fleet.</p>
-                </GlassCard>
-             ) : (
-                <>
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <GlassCard className="border-t-4 border-t-orange-500 md:col-span-1">
-                         <div className="space-y-3">
-                           <div className="text-orange-400 font-bold uppercase tracking-widest text-[10px]">Active Digital Twin</div>
-                           <h2 className="text-2xl font-bold text-white">{activeDevice.properties.name}</h2>
-                           <div className="flex items-center gap-2">
-                              <span className="text-4xl font-bold text-white">{currentTemp}°C</span>
-                              <span className="text-white/30 text-xs uppercase tracking-tighter">Current Temp</span>
-                           </div>
-                         </div>
-                      </GlassCard>
-                      
-                      <GlassCard className="md:col-span-2">
-                         <div className="grid grid-cols-2 gap-4 h-full">
-                            <div className="flex flex-col justify-center border-r border-white/5">
-                               <span className="text-[10px] text-white/40 uppercase font-bold mb-1">System Strain</span>
-                               <span className={`text-3xl font-bold ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-red-400' : 'text-emerald-400'}`}>
-                                  {prediction?.strain_score || '--'}/100
-                               </span>
-                            </div>
-                            <div className="flex flex-col justify-center">
-                               <span className="text-[10px] text-white/40 uppercase font-bold mb-1">Risk Assessment</span>
-                               <span className={`text-lg font-bold uppercase tracking-wider ${prediction?.failure_risk === 'CRITICAL' ? 'text-red-500' : 'text-white'}`}>
-                                  {prediction?.failure_risk || 'CALCULATING'}
-                               </span>
-                            </div>
-                         </div>
-                      </GlassCard>
-                   </div>
-
-                   <GlassCard title="Telemetry Heartbeat" icon={<Icons.Activity />}>
-                      <HeartbeatGraph data={readings} />
-                   </GlassCard>
-
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <GlassCard title="Machine Learning Insights" icon={<Icons.Zap />}>
-                         <div className="space-y-3">
-                            {prediction?.recommendations.map((r, i) => (
-                              <div key={i} className="text-[11px] text-white/80 border-l-2 border-orange-500 pl-3 py-2 bg-white/5 flex items-center gap-2">
-                                <Icons.Check />
-                                {r}
-                              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <aside className="lg:col-span-3 space-y-6">
+           <GlassCard title="Managed Fleet" icon={<Icons.Activity />} className="p-0">
+              <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
+                 {devices.map((d) => (
+                    <button
+                      key={d.device_id}
+                      onClick={() => switchDevice(d)}
+                      className={`w-full p-5 border-b border-white/5 text-left transition-all flex items-center justify-between group ${activeDevice?.device_id === d.device_id ? 'bg-orange-500/10 border-r-4 border-r-orange-500' : 'hover:bg-white/[0.02]'}`}
+                    >
+                       <div className="flex flex-col gap-1">
+                          <span className="text-xs font-black text-white uppercase tracking-wider group-hover:text-orange-400 transition-colors">
+                            {d.properties.name}
+                          </span>
+                          <span className="text-[9px] text-white/30 font-mono tracking-tighter">
+                            MAC: {d.device_id.split('_').pop()?.toUpperCase() || 'UNKNOWN'}
+                          </span>
+                       </div>
+                       <div className="flex flex-col items-end gap-2">
+                          <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter ${d.properties.online ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                            {d.properties.online ? 'Online' : 'Offline'}
+                          </div>
+                          <div className="flex gap-0.5 h-3 items-end">
+                            {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8].map((v, i) => (
+                              <div key={i} className="w-0.5 bg-white/20 rounded-full" style={{ height: `${v * 100}%` }} />
                             ))}
-                         </div>
-                      </GlassCard>
+                          </div>
+                       </div>
+                    </button>
+                 ))}
+              </div>
+           </GlassCard>
 
-                      {certificate ? (
-                        <EfficiencyCertificateCard certificate={certificate} onUpdate={setCertificate} />
-                      ) : (
-                        <GlassCard title="Asset Trust Verification" icon={<Icons.ShieldCheck />}>
-                          <div className="space-y-4">
-                             <p className="text-xs text-white/50 leading-relaxed italic">
-                               Verify this specific hardware signature on the public ledger to lock in Enbridge rebate eligibility.
-                             </p>
-                             <button 
-                               onClick={() => {
-                                  setIsMinting(true);
-                                  setTimeout(() => {
-                                     generateEfficiencyCertificate(activeDevice.device_id, prediction!).then(cert => {
+           <GlassCard variant="premium" className="bg-gradient-to-br from-orange-500/10 to-transparent border-orange-500/20">
+              <div className="space-y-4">
+                 <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">GTA Weather Sync</span>
+                    <span className="text-[10px] font-bold text-orange-400">Toronto, ON</span>
+                 </div>
+                 <div className="flex items-center justify-between">
+                    <div className="text-2xl font-bold text-white">-2 Celsius</div>
+                    <div className="text-xs text-white/60">Cloudy</div>
+                 </div>
+                 <p className="text-[10px] leading-relaxed text-white/40 italic">
+                   Current outside temp indicates high heating load for Residential Zone 5 units.
+                 </p>
+              </div>
+           </GlassCard>
+        </aside>
+
+        <main className="lg:col-span-9 space-y-8">
+           {!activeDevice ? (
+              <GlassCard className="flex flex-col items-center justify-center py-60 border-dashed border-2">
+                 <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center text-orange-500 mb-6 animate-pulse border border-white/10">
+                    <Icons.Cpu />
+                 </div>
+                 <h2 className="text-2xl font-black text-white uppercase tracking-[0.3em]">Initialize Fleet Trace</h2>
+                 <p className="text-white/30 text-xs mt-2 uppercase tracking-widest font-bold">Select hardware to bridge digital twin</p>
+              </GlassCard>
+           ) : (
+              <div className="space-y-8 animate-fade-in">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <GlassCard className="relative group overflow-hidden border-l-4 border-l-orange-500" variant="premium">
+                       <div className="relative z-10 space-y-4">
+                         <div className="text-orange-500 font-black uppercase tracking-widest text-[9px]">Real-time Telemetry</div>
+                         <h2 className="text-3xl font-black text-white uppercase">{activeDevice.properties.name}</h2>
+                         <div className="flex items-baseline gap-3">
+                            <span className="text-5xl font-black text-white tracking-tighter">{currentTemp}deg</span>
+                            <span className="text-white/20 text-xs font-bold uppercase tracking-widest">Celsius</span>
+                         </div>
+                       </div>
+                    </GlassCard>
+                    <div className="md:col-span-2">
+                       <AISystemArchitect device={activeDevice} readings={readings} />
+                    </div>
+                 </div>
+                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div className="lg:col-span-8">
+                       <GlassCard title="System Load & Efficiency Heartbeat" icon={<Icons.Activity />}>
+                          <HeartbeatGraph data={readings} />
+                       </GlassCard>
+                    </div>
+                    <div className="lg:col-span-4 space-y-8">
+                       <GlassCard title="Predictive Triage" icon={<Icons.Zap />}>
+                          <div className="space-y-6">
+                             <div className="flex justify-between items-end">
+                                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Strain Score</span>
+                                <span className={`text-4xl font-black ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-orange-500' : 'text-emerald-400'}`}>
+                                  {prediction?.strain_score || '--'}%
+                                </span>
+                             </div>
+                             <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.8)] transition-all duration-1000" style={{ width: `${prediction?.strain_score || 0}%` }} />
+                             </div>
+                             <div className="pt-4 border-t border-white/5 flex flex-col gap-2">
+                                {prediction?.recommendations.slice(0, 2).map((r, i) => (
+                                  <div key={i} className="text-[10px] text-white/60 flex items-center gap-3">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                                    {r}
+                                  </div>
+                                ))}
+                             </div>
+                          </div>
+                       </GlassCard>
+                       {certificate ? (
+                          <EfficiencyCertificateCard certificate={certificate} onUpdate={setCertificate} />
+                       ) : (
+                          <GlassCard title="Web 3.0 Verification" icon={<Icons.ShieldCheck />} variant="premium">
+                             <div className="space-y-4">
+                                <p className="text-[10px] text-white/40 leading-relaxed uppercase font-bold tracking-widest">
+                                  Secure asset hash for Enbridge HER+ rebate eligibility.
+                                </p>
+                                <button 
+                                  onClick={() => {
+                                     if (!activeDevice || !prediction) return;
+                                     setIsMinting(true);
+                                     generateEfficiencyCertificate(activeDevice.device_id, prediction).then(cert => {
                                         setCertificate(cert);
                                         setIsMinting(false);
-                                     });
-                                  }, 1500);
-                               }}
-                               className="w-full py-4 bg-orange-500 hover:bg-orange-600 rounded text-xs font-bold uppercase tracking-widest text-white transition-all shadow-lg shadow-orange-900/30"
-                             >
-                               {isMinting ? 'Authenticating Asset...' : 'Mint Efficiency ID'}
-                             </button>
-                          </div>
-                        </GlassCard>
-                      )}
-                   </div>
-                </>
-             )}
-          </div>
-
-        </div>
-      )}
+                                     }).catch(() => setIsMinting(false));
+                                  }}
+                                  className="w-full py-4 bg-orange-500 hover:bg-white hover:text-black rounded-lg text-[10px] font-black uppercase tracking-widest text-white transition-all shadow-2xl"
+                                >
+                                  {isMinting ? 'Hashing Ledger...' : 'Authenticate Unit'}
+                                </button>
+                             </div>
+                          </GlassCard>
+                       )}
+                    </div>
+                 </div>
+              </div>
+           )}
+        </main>
+      </div>
     </div>
   );
 };

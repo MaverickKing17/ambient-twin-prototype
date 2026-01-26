@@ -40,7 +40,6 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
   const [sendingLead, setSendingLead] = useState(false);
   const [selectedMonthIndex, setSelectedMonthIndex] = useState<number | null>(null);
 
-  // Mock Data mimicking a fetch based on homeId
   const profile = {
     address: "123 Maple Avenue, Toronto",
     system: "Lennox 80% AFUE Furnace (2014)",
@@ -50,10 +49,7 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
   };
 
   useEffect(() => {
-    // SEO: Dynamic Title
     document.title = `Audit: ${profile.address} | Ambient Twin`;
-
-    // Simulate Security/Magic Link Verification
     const timer = setTimeout(() => {
       setAccessState('granted');
     }, 2000);
@@ -62,14 +58,11 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
 
   const handleConsult = async () => {
     setSendingLead(true);
-    
-    // Call Supabase to save the lead real-time
     const success = await supabaseService.captureLead({
       home_id: homeId,
       address: profile.address,
       rebate_amount: profile.rebateAmount
     });
-
     if (success) {
       setLeadCaptured(true);
     }
@@ -85,17 +78,14 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
     doc.text("Enbridge Home Efficiency Report", 20, 30);
     doc.setFontSize(14);
     doc.text(`Prepared for: ${profile.address}`, 20, 45);
-    
     doc.setTextColor(249, 115, 22);
     doc.setFontSize(40);
     doc.text(`$${profile.rebateAmount.toLocaleString()} Approved`, 20, 70);
-    
     doc.setTextColor(200, 200, 200);
     doc.setFontSize(12);
     doc.text("Based on your Digital Twin analysis, upgrading your", 20, 90);
     doc.text(`${profile.system} will qualify for the Tier 1`, 20, 96);
     doc.text("Enbridge Home Efficiency Rebate Program.", 20, 102);
-    
     doc.save("Rebate_Eligibility_2026.pdf");
   };
 
@@ -124,7 +114,7 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-100"></div>
              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-200"></div>
            </div>
-           <p className="text-white/40 text-xs font-mono mt-2">Verifying Magic Link Token: {homeId.substring(0,8)}...</p>
+           <p className="text-white/40 text-xs font-mono mt-2">Verifying Magic Link Token: {homeId.slice(0, 8)}...</p>
         </div>
       </div>
     );
@@ -134,13 +124,9 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-20 animate-fade-in relative z-10">
-      
-      {/* Navbar / Status Bar */}
       <div className="flex items-center justify-between py-4 px-2">
         <div className="flex items-center gap-2">
-           <div className="h-6 w-6 rounded bg-gradient-to-br from-orange-400 to-red-600 flex items-center justify-center text-[10px] font-bold text-white shadow-lg shadow-orange-500/20">
-             AT
-           </div>
+           <div className="h-6 w-6 rounded bg-gradient-to-br from-orange-400 to-red-600 flex items-center justify-center text-[10px] font-bold text-white shadow-lg shadow-orange-500/20">AT</div>
            <span className="text-sm font-semibold text-white tracking-tight">Ambient Twin</span>
         </div>
         <div className="flex items-center gap-3">
@@ -155,196 +141,88 @@ export const HomeownerPortal: React.FC<Props> = ({ homeId }) => {
         </div>
       </div>
 
-      {/* Hero Section */}
       <GlassCard className="text-center py-10 relative overflow-hidden border-t-4 border-t-orange-500 group">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-500/10 via-slate-900/0 to-slate-900/0 pointer-events-none"></div>
         <h2 className="text-white/60 text-xs md:text-sm uppercase tracking-[0.2em] font-bold mb-3">2026 Efficiency Audit</h2>
         <h1 className="text-xl md:text-3xl font-bold text-white mb-6 px-4">{profile.address}</h1>
-        
         <div className="inline-block relative transform transition-transform duration-500 group-hover:scale-105">
            <div className="text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tighter drop-shadow-2xl">
              ${profile.rebateAmount.toLocaleString()}
            </div>
-           <div className="absolute -top-4 -right-8 rotate-12 bg-orange-500 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded shadow-lg border border-orange-400">
-             ELIGIBLE
-           </div>
+           <div className="absolute -top-4 -right-8 rotate-12 bg-orange-500 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded shadow-lg border border-orange-400">ELIGIBLE</div>
         </div>
-        
-        <p className="mt-4 text-orange-400 font-medium text-sm md:text-base">
-          Total Enbridge Rebate Available
-        </p>
+        <p className="mt-4 text-orange-400 font-medium text-sm md:text-base">Total Enbridge Rebate Available</p>
       </GlassCard>
 
-      {/* Financial Leakage */}
       <GlassCard title="Projected Financial Waste (6 Mo)">
          <div className="mb-4 text-sm text-white/70">
-           Your current <span className="text-white font-bold">{profile.system}</span> is operating at 
-           <span className="text-red-400 font-bold"> 80% efficiency</span>. 
+           Your current <span className="text-white font-bold">{profile.system}</span> is operating at <span className="text-red-400 font-bold">80% efficiency</span>. 
            {selectedMonthIndex === null ? (
-             <span> You are losing approximately <span className="text-white font-bold"> ${profile.monthlyWaste}/month</span> in potential savings.</span>
+             <span> You are losing approximately <span className="text-white font-bold">${profile.monthlyWaste}/month</span> in potential savings.</span>
            ) : (
-             <span className="text-orange-300 ml-1">Click on the chart bars to inspect leakage sources.</span>
+             <span className="text-orange-300 ml-1">Leakage source details revealed below.</span>
            )}
          </div>
-         
          <div className="h-[250px] w-full relative">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart 
-                data={chartData} 
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                onClick={(data) => {
-                  if (data && data.activeTooltipIndex !== undefined) {
-                    setSelectedMonthIndex(data.activeTooltipIndex);
-                  }
-                }}
-                cursor="pointer"
-              >
+              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} onClick={(data) => { if (data && data.activeTooltipIndex !== undefined) setSelectedMonthIndex(data.activeTooltipIndex); }} cursor="pointer">
                 <defs>
-                   <linearGradient id="currentGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8}/>
-                      <stop offset="100%" stopColor="#ef4444" stopOpacity={0.3}/>
-                   </linearGradient>
-                   <linearGradient id="optGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
-                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.3}/>
-                   </linearGradient>
+                   <linearGradient id="currentGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ef4444" stopOpacity={0.8}/><stop offset="100%" stopColor="#ef4444" stopOpacity={0.3}/></linearGradient>
+                   <linearGradient id="optGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/><stop offset="100%" stopColor="#10b981" stopOpacity={0.3}/></linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                 <XAxis dataKey="name" stroke="rgba(255,255,255,0.4)" fontSize={10} axisLine={false} tickLine={false} />
                 <YAxis stroke="rgba(255,255,255,0.4)" fontSize={10} axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}`} />
-                <Tooltip 
-                  cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
-                />
-                <Bar 
-                  dataKey="current" 
-                  name="Current Bill" 
-                  fill="url(#currentGradient)" 
-                  radius={[4, 4, 0, 0]} 
-                  barSize={12} 
-                  animationDuration={1500}
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fillOpacity={selectedMonthIndex !== null && selectedMonthIndex !== index ? 0.3 : 1}
-                      stroke={selectedMonthIndex === index ? '#fff' : 'none'}
-                      strokeWidth={selectedMonthIndex === index ? 1 : 0}
-                    />
-                  ))}
+                <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }} />
+                <Bar dataKey="current" name="Current Bill" fill="url(#currentGradient)" radius={[4, 4, 0, 0]} barSize={12}>
+                  {chartData.map((entry, index) => <Cell key={`cell-${index}`} fillOpacity={selectedMonthIndex !== null && selectedMonthIndex !== index ? 0.3 : 1} stroke={selectedMonthIndex === index ? '#fff' : 'none'} strokeWidth={selectedMonthIndex === index ? 1 : 0} />)}
                 </Bar>
-                <Bar 
-                  dataKey="optimized" 
-                  name="With Heat Pump" 
-                  fill="url(#optGradient)" 
-                  radius={[4, 4, 0, 0]} 
-                  barSize={12} 
-                  animationDuration={1500} 
-                  animationBegin={300} 
-                >
-                   {chartData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-opt-${index}`} 
-                      fillOpacity={selectedMonthIndex !== null && selectedMonthIndex !== index ? 0.3 : 1}
-                    />
-                  ))}
+                <Bar dataKey="optimized" name="With Heat Pump" fill="url(#optGradient)" radius={[4, 4, 0, 0]} barSize={12}>
+                   {chartData.map((entry, index) => <Cell key={`cell-opt-${index}`} fillOpacity={selectedMonthIndex !== null && selectedMonthIndex !== index ? 0.3 : 1} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-            
             {selectedMonthIndex === null && (
-               <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 pointer-events-none bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] text-white/70 border border-white/10 animate-pulse">
-                 Tap any bar to inspect
-               </div>
+               <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 pointer-events-none bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] text-white/70 border border-white/10 animate-pulse">Tap any bar to inspect</div>
             )}
          </div>
-
-         {/* Interactive Analysis Pane */}
          <div className={`mt-6 rounded border border-white/5 bg-gradient-to-r from-white/5 to-transparent transition-all duration-500 ease-out overflow-hidden ${selectedData ? 'opacity-100 max-h-40' : 'opacity-50 max-h-12'}`}>
             {selectedData ? (
                <div className="p-4 flex flex-col md:flex-row gap-4 items-center">
-                  <div className="flex-shrink-0 p-3 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
-                     <PortalIcons.Alert />
-                  </div>
+                  <div className="flex-shrink-0 p-3 rounded-full bg-red-500/20 text-red-400 border border-red-500/30"><PortalIcons.Alert /></div>
                   <div className="flex-1 w-full text-center md:text-left">
                      <div className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-1">Diagnosis for {selectedData.name}</div>
                      <h3 className="text-white font-bold text-lg mb-1">{selectedData.reason}</h3>
-                     <p className="text-xs text-white/60">
-                       System efficiency drops due to mechanical strain, causing excess energy draw.
-                     </p>
+                     <p className="text-xs text-white/60">System efficiency drops due to mechanical strain, causing excess energy draw.</p>
                   </div>
                   <div className="flex-shrink-0 text-center md:text-right bg-black/20 p-3 rounded-md border border-white/5">
                      <div className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold mb-1">Recoverable</div>
-                     <div className="text-2xl font-bold text-emerald-400">
-                        ${selectedData.current - selectedData.optimized}
-                     </div>
+                     <div className="text-2xl font-bold text-emerald-400">${selectedData.current - selectedData.optimized}</div>
                   </div>
                </div>
             ) : (
-               <div className="p-4 flex items-center justify-center text-white/30 text-xs italic gap-2">
-                 <PortalIcons.Info />
-                 Select a month above to reveal the specific mechanical failure causing the loss.
-               </div>
+               <div className="p-4 flex items-center justify-center text-white/30 text-xs italic gap-2"><PortalIcons.Info />Select a month above to reveal mechanical failure cause.</div>
             )}
          </div>
       </GlassCard>
 
-      {/* Action Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <GlassCard className="flex flex-col justify-between h-full bg-gradient-to-br from-white/5 to-white/10 hover:border-white/20 transition-all">
            <div className="space-y-2">
              <h3 className="text-lg font-bold text-white">Official Rebate Guide</h3>
-             <p className="text-xs text-white/60 leading-relaxed">
-               Download your personalized PDF report detailing the technical specifications required to claim the $10,600.
-             </p>
+             <p className="text-xs text-white/60 leading-relaxed">Download your personalized PDF report for claiming the $10,600.</p>
            </div>
-           <button 
-             onClick={downloadGuide}
-             className="mt-6 w-full py-3 rounded bg-white/5 border border-white/10 hover:bg-white/10 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all"
-           >
-             <PortalIcons.Download />
-             Download PDF
-           </button>
+           <button onClick={downloadGuide} className="mt-6 w-full py-3 rounded bg-white/5 border border-white/10 hover:bg-white/10 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all"><PortalIcons.Download />Download PDF</button>
         </GlassCard>
-
         <GlassCard className="flex flex-col justify-between h-full border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-transparent hover:border-orange-500/50 transition-all">
            <div className="space-y-2">
              <h3 className="text-lg font-bold text-white">Claim Your Rebate</h3>
-             <p className="text-xs text-white/60 leading-relaxed">
-               Schedule a verification call with <strong>{profile.contractor}</strong> to lock in your 2026 eligibility before funds run out.
-             </p>
+             <p className="text-xs text-white/60 leading-relaxed">Schedule verification with <strong>{profile.contractor}</strong> to lock in eligibility.</p>
            </div>
-           <button 
-             onClick={handleConsult}
-             disabled={leadCaptured || sendingLead}
-             className={`mt-6 w-full py-3 rounded text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-900/40
-               ${leadCaptured 
-                 ? 'bg-emerald-600 text-white cursor-default' 
-                 : 'bg-orange-500 hover:bg-orange-600 text-white'}
-               ${sendingLead ? 'opacity-70 cursor-wait' : ''}
-             `}
-           >
-             {sendingLead ? (
-               <span className="animate-pulse">Sending Request...</span>
-             ) : leadCaptured ? (
-               <>
-                 <PortalIcons.Check />
-                 Request Sent
-               </>
-             ) : (
-               <>
-                 <PortalIcons.Chat />
-                 Consult {profile.contractor}
-               </>
-             )}
+           <button onClick={handleConsult} disabled={leadCaptured || sendingLead} className={`mt-6 w-full py-3 rounded text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-900/40 ${leadCaptured ? 'bg-emerald-600 text-white cursor-default' : 'bg-orange-500 hover:bg-orange-600 text-white'} ${sendingLead ? 'opacity-70 cursor-wait' : ''}`}>
+             {sendingLead ? <span className="animate-pulse">Sending Request...</span> : leadCaptured ? <><PortalIcons.Check />Request Sent</> : <><PortalIcons.Chat />Consult {profile.contractor}</>}
            </button>
         </GlassCard>
-      </div>
-
-      <div className="text-center pt-8">
-        <p className="text-[10px] text-white/30 max-w-xs mx-auto">
-          Secure Link ID: {homeId} • Verified by Ambient Twin™ • End-to-End Encrypted.
-        </p>
       </div>
     </div>
   );
