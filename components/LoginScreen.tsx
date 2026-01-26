@@ -41,7 +41,7 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
       try {
         const supabase = createClient(supabaseUrl, supabaseKey);
         const { error } = await supabase
-          .from('leads') // Changed to 'leads' since we know it exists from previous build
+          .from('leads')
           .select('count', { count: 'exact', head: true });
 
         if (error) {
@@ -152,26 +152,42 @@ export const LoginScreen: React.FC<Props> = ({ onLogin }) => {
           </div>
         </GlassCard>
 
-        {/* --- New Developer Resources Section --- */}
-        <div className="mt-8 grid grid-cols-2 gap-4 animate-fade-in opacity-80 hover:opacity-100 transition-opacity">
-           <a 
-             href="https://docs.getseam.com/device-guides/thermostats/honeywell-resideo" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             className="bg-white/5 border border-white/10 p-3 rounded-md hover:bg-white/10 transition-all group"
-           >
-              <div className="text-[9px] font-bold text-orange-400 uppercase tracking-widest mb-1">Setup Guide</div>
-              <div className="text-[11px] text-white/70 group-hover:text-white leading-tight">Honeywell Digital Twin Setup &rarr;</div>
-           </a>
-           <a 
-             href="https://docs.getseam.com/thermostats/sandbox-devices" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             className="bg-white/5 border border-white/10 p-3 rounded-md hover:bg-white/10 transition-all group"
-           >
-              <div className="text-[9px] font-bold text-orange-400 uppercase tracking-widest mb-1">Credentials</div>
-              <div className="text-[11px] text-white/70 group-hover:text-white leading-tight">Virtual Sandbox Login Info &rarr;</div>
-           </a>
+        {/* --- Fix: Updated Developer Resources Section --- */}
+        <div className="mt-8 grid grid-cols-1 gap-4">
+           <div className="bg-orange-500/10 border border-orange-500/20 p-4 rounded-md animate-fade-in">
+              <div className="flex items-start gap-3">
+                 <div className="text-orange-400 mt-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                 </div>
+                 <div>
+                    <h4 className="text-[11px] font-bold text-white uppercase tracking-wider mb-1">Resideo Sandbox Tip</h4>
+                    <p className="text-[10px] text-white/60 leading-normal">
+                      To bypass the Resideo login screen, use any email/password. Seam Sandbox usually accepts <span className="text-orange-400 font-mono">sandbox-user@getseam.com</span>.
+                    </p>
+                 </div>
+              </div>
+           </div>
+
+           <div className="grid grid-cols-2 gap-4 opacity-80 hover:opacity-100 transition-opacity">
+              <a 
+                href="https://docs.getseam.com/device-providers/honeywell-resideo" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="bg-white/5 border border-white/10 p-3 rounded-md hover:bg-white/10 transition-all group"
+              >
+                  <div className="text-[9px] font-bold text-orange-400 uppercase tracking-widest mb-1">Honeywell Guide</div>
+                  <div className="text-[10px] text-white/70 group-hover:text-white leading-tight">Provider Docs &rarr;</div>
+              </a>
+              <a 
+                href="https://docs.getseam.com/getting-started/sandbox-devices" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="bg-white/5 border border-white/10 p-3 rounded-md hover:bg-white/10 transition-all group"
+              >
+                  <div className="text-[9px] font-bold text-orange-400 uppercase tracking-widest mb-1">Sandbox Info</div>
+                  <div className="text-[10px] text-white/70 group-hover:text-white leading-tight">Virtual Device setup &rarr;</div>
+              </a>
+           </div>
         </div>
       </div>
     </div>
