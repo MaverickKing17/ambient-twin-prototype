@@ -4,12 +4,14 @@ import { GlassCard } from './GlassCard';
 import { HeartbeatGraph } from './HeartbeatGraph';
 import { EfficiencyCertificateCard } from './EfficiencyCertificateCard';
 import { generateEfficiencyCertificate } from '../services/ledgerService';
-import { thermostatConnector } from '../services/ThermostatConnector';
+import { seamService } from '../services/seamService';
+import { xanoService } from '../services/xanoService';
 import { 
   SystemStrainPrediction, 
   EfficiencyCertificate, 
   ProviderType, 
-  TelemetryReading
+  TelemetryReading,
+  SeamDevice
 } from '../types';
 
 const Icons = {
@@ -30,92 +32,98 @@ export const Dashboard: React.FC = () => {
   
   // Connection State
   const [connectedProvider, setConnectedProvider] = useState<ProviderType | null>(null);
+  const [activeDevice, setActiveDevice] = useState<SeamDevice | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
-  // Load initial data if connected
+  // ENTERPRISE LOGIC: Check for Seam Callback Parameters on Load
   useEffect(() => {
-    // Check if we have an existing session
-    if (thermostatConnector.isConnected(ProviderType.ECOBEE)) {
-      handleProviderSelect(ProviderType.ECOBEE, false);
-    } else if (thermostatConnector.isConnected(ProviderType.NEST)) {
-      handleProviderSelect(ProviderType.NEST, false);
-    } else if (thermostatConnector.isConnected(ProviderType.HONEYWELL)) {
-      handleProviderSelect(ProviderType.HONEYWELL, false);
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get('success');
+    const mockToken = params.get('mock_token');
+    const provider = params.get('provider') as ProviderType;
+
+    if (success && mockToken && provider) {
+      // Clear URL to clean up
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Initialize Connection
+      initializeSession(provider, mockToken);
     }
   }, []);
 
-  const handleProviderSelect = async (provider: ProviderType, performAuth = true) => {
+  const initializeSession = async (provider: ProviderType, token: string) => {
+    setConnectedProvider(provider);
     setIsConnecting(true);
     try {
-      if (performAuth) {
-        await thermostatConnector.initiateAuth(provider);
-        console.log(`Redirecting...`); 
-        await thermostatConnector.handleCallback(provider, 'mock_auth_code_123');
+      const devices = await seamService.listDevices(token);
+      if (devices.length > 0) {
+        setActiveDevice(devices[0]);
+        await loadDeviceData(devices[0]);
       }
-
-      const { readings: newReadings } = await thermostatConnector.fetchSystemStrainData(provider);
-      
-      setConnectedProvider(provider);
-      setReadings(newReadings);
-      setCertificate(null);
-
-      // Simulate ML Prediction
-      setTimeout(() => {
-        let strainScore = 35;
-        let efficiencyIndex = 0.92;
-        let recommendations = ['Check filter in 15 days', 'Optimized for rebate tier 1'];
-
-        if (provider === ProviderType.NEST) {
-          strainScore = 24;
-          efficiencyIndex = 0.96;
-          recommendations = ['System optimized', 'Continue usage pattern'];
-        } else if (provider === ProviderType.HONEYWELL) {
-          strainScore = 29;
-          efficiencyIndex = 0.94;
-          recommendations = ['Calibration recommended', 'Cycle times are optimal'];
-        }
-
-        setPrediction({
-          strainScore,
-          efficiencyIndex,
-          predictedFailureRisk: 'LOW',
-          anomalies: [],
-          recommendations
-        });
-      }, 800);
-
-    } catch (error) {
-      console.error("Connection failed", error);
+    } catch (e) {
+      console.error("Failed to init session", e);
     } finally {
       setIsConnecting(false);
     }
   };
 
-  const handleDisconnect = () => {
-    if (connectedProvider) {
-      thermostatConnector.disconnect(connectedProvider);
-      setConnectedProvider(null);
-      setReadings([]);
-      setPrediction(null);
-      setCertificate(null);
+  // 1. Handle Connecting to Seam (The "Connect" Flow)
+  const handleConnectProvider = async (provider: ProviderType) => {
+    setIsConnecting(true);
+    try {
+      // Step A: Get the Webview URL (Calls Seam/Xano)
+      const connectUrl = await seamService.createConnectWebview(provider);
+      
+      // Step B: Redirect User to Seam (In a real app, this is a window.location.href)
+      // For this demo structure, the service returns a self-link with params to simulate the callback.
+      window.location.href = connectUrl;
+      
+    } catch (error) {
+      console.error("Seam Connection Failed:", error);
+      setIsConnecting(false);
     }
   };
 
+  // 2. Load Data from Backend (Xano) + Seam Telemetry
+  const loadDeviceData = async (device: SeamDevice) => {
+    try {
+      // Fetch historical telemetry (from Seam/Xano)
+      const newReadings = await seamService.getTelemetryHistory(device.device_id);
+      setReadings(newReadings);
+      setCertificate(null);
+
+      // Run ML Prediction (via Xano)
+      const newPrediction = await xanoService.generatePrediction(device.device_id, newReadings);
+      setPrediction(newPrediction);
+
+    } catch (error) {
+      console.error("Data Load Error:", error);
+    }
+  };
+
+  const handleDisconnect = () => {
+    setConnectedProvider(null);
+    setActiveDevice(null);
+    setReadings([]);
+    setPrediction(null);
+    setCertificate(null);
+  };
+
   const handleMintCertificate = useCallback(async () => {
-    if (!prediction || !connectedProvider) return;
+    if (!prediction || !activeDevice) return;
     setIsMinting(true);
     try {
-      const cert = await generateEfficiencyCertificate(`${connectedProvider}-DEVICE-001`, prediction);
+      const cert = await generateEfficiencyCertificate(activeDevice.device_id, prediction);
       setCertificate(cert);
     } catch (e) {
       console.error("Ledger error", e);
     } finally {
       setIsMinting(false);
     }
-  }, [prediction, connectedProvider]);
+  }, [prediction, activeDevice]);
 
   const handleSharePortal = () => {
-    const mockHomeId = "HOME-8829-X";
+    const mockHomeId = activeDevice ? `HOME-${activeDevice.device_id.substr(0,4).toUpperCase()}` : "DEMO";
     const url = `${window.location.origin}/#portal/${mockHomeId}`;
     navigator.clipboard.writeText(url).then(() => {
       setLinkCopied(true);
@@ -134,21 +142,21 @@ export const Dashboard: React.FC = () => {
             {!connectedProvider ? (
               <div className="flex gap-2 flex-wrap">
                 <button 
-                  onClick={() => handleProviderSelect(ProviderType.ECOBEE)}
+                  onClick={() => handleConnectProvider(ProviderType.ECOBEE)}
                   disabled={isConnecting}
                   className="px-4 py-1.5 rounded-sm bg-white/5 hover:bg-orange-500 hover:text-white border border-white/20 text-xs font-semibold uppercase tracking-wide transition-all flex items-center gap-2"
                 >
                    {isConnecting ? 'Connecting...' : 'Connect Ecobee'}
                 </button>
                 <button 
-                   onClick={() => handleProviderSelect(ProviderType.NEST)}
+                   onClick={() => handleConnectProvider(ProviderType.NEST)}
                    disabled={isConnecting}
                    className="px-4 py-1.5 rounded-sm bg-white/5 hover:bg-orange-500 hover:text-white border border-white/20 text-xs font-semibold uppercase tracking-wide transition-all flex items-center gap-2"
                 >
                    {isConnecting ? 'Connecting...' : 'Connect Nest'}
                 </button>
                 <button 
-                   onClick={() => handleProviderSelect(ProviderType.HONEYWELL)}
+                   onClick={() => handleConnectProvider(ProviderType.HONEYWELL)}
                    disabled={isConnecting}
                    className="px-4 py-1.5 rounded-sm bg-white/5 hover:bg-orange-500 hover:text-white border border-white/20 text-xs font-semibold uppercase tracking-wide transition-all flex items-center gap-2"
                 >
@@ -159,7 +167,7 @@ export const Dashboard: React.FC = () => {
               <div className="flex items-center gap-2">
                  <span className="flex items-center gap-2 text-sm text-orange-400 font-medium">
                     <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-                    Connected to {connectedProvider}
+                    Connected to {activeDevice?.properties.name || connectedProvider}
                  </span>
                  <button 
                     onClick={handleDisconnect}
@@ -197,10 +205,13 @@ export const Dashboard: React.FC = () => {
             <div className="mx-auto w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-orange-400 mb-4">
               <Icons.Link />
             </div>
-            <h2 className="text-xl font-bold text-white mb-2">Connect Your Thermostat</h2>
+            <h2 className="text-xl font-bold text-white mb-2">Connect System to Twin</h2>
             <p className="text-white/70 mb-6 font-light">
-              Link your Ecobee, Nest, or Honeywell account to ingest live telemetry, analyze system strain, and mint your efficiency certificate.
+              Link a <span className="text-white font-semibold">Real Device</span> or a <span className="text-white font-semibold">Seam Virtual Sandbox</span> to begin telemetry ingestion and system strain analysis.
             </p>
+            <div className="text-[10px] text-white/30 uppercase tracking-widest mt-4">
+              Powered by Seam API
+            </div>
           </GlassCard>
         </div>
       ) : (
@@ -223,7 +234,7 @@ export const Dashboard: React.FC = () => {
                   <span className="text-white/50 ml-2">max potential</span>
                 </div>
                 <p className="text-sm text-white/80 leading-relaxed">
-                  Your system efficiency score of <span className="text-orange-400 font-bold">{Math.round((prediction?.efficiencyIndex || 0) * 100)}%</span> qualifies you for Tier 1 rebate incentives.
+                  Your system efficiency score of <span className="text-orange-400 font-bold">{Math.round((prediction?.efficiency_index || 0) * 100)}%</span> qualifies you for Tier 1 rebate incentives.
                 </p>
                 <button 
                   className="w-full py-2.5 px-4 rounded-sm bg-orange-500 hover:bg-orange-600 text-white transition-all text-sm font-semibold shadow-lg shadow-orange-900/20"
@@ -244,7 +255,7 @@ export const Dashboard: React.FC = () => {
                <GlassCard className="flex flex-col items-center justify-center py-6">
                   <div className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-1">Strain</div>
                   <div className="text-2xl font-bold text-white flex items-center gap-1">
-                    {prediction?.strainScore || '--'} <span className="text-sm text-orange-400">/ 100</span>
+                    {prediction?.strain_score || '--'} <span className="text-sm text-orange-400">/ 100</span>
                   </div>
                </GlassCard>
             </div>
@@ -294,14 +305,14 @@ export const Dashboard: React.FC = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-white/70">Failure Risk</span>
-                      <span className={`px-2 py-0.5 rounded-sm text-xs font-bold ${prediction?.predictedFailureRisk === 'LOW' ? 'bg-white/10 text-white border border-white/20' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
-                        {prediction?.predictedFailureRisk || 'ANALYZING...'}
+                      <span className={`px-2 py-0.5 rounded-sm text-xs font-bold ${prediction?.failure_risk === 'LOW' ? 'bg-white/10 text-white border border-white/20' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
+                        {prediction?.failure_risk || 'ANALYZING...'}
                       </span>
                     </div>
                     <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-orange-500 transition-all duration-1000"
-                        style={{ width: `${prediction?.strainScore || 0}%` }}
+                        style={{ width: `${prediction?.strain_score || 0}%` }}
                       />
                     </div>
                     <div className="space-y-2 pt-2">

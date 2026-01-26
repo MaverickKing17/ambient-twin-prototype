@@ -22,13 +22,13 @@ export const generateEfficiencyCertificate = async (
   await new Promise(resolve => setTimeout(resolve, 1500));
 
   const timestamp = Date.now();
-  const efficiencyScore = Math.round(prediction.efficiencyIndex * 100);
+  const efficiencyScore = Math.round(prediction.efficiency_index * 100);
   
   // Derive Metrics from ML data
   // Base SEER2 for a modern unit is ~16. We scale it based on efficiency index.
-  const seer2 = parseFloat((16 + (prediction.efficiencyIndex * 6)).toFixed(1)); 
+  const seer2 = parseFloat((16 + (prediction.efficiency_index * 6)).toFixed(1)); 
   // Base HSPF2 is ~8.5.
-  const hspf2 = parseFloat((7.5 + (prediction.efficiencyIndex * 3)).toFixed(1));
+  const hspf2 = parseFloat((7.5 + (prediction.efficiency_index * 3)).toFixed(1));
 
   let grade: EfficiencyCertificate['grade'] = 'C';
   if (efficiencyScore >= 95) grade = 'A+';
