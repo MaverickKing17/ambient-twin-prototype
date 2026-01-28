@@ -7,6 +7,41 @@ interface HeartbeatGraphProps {
   data: TelemetryReading[];
 }
 
+const CustomActiveDot = (props: any) => {
+  const { cx, cy, stroke } = props;
+  return (
+    <g>
+      <defs>
+        <filter id="glow-dot" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+      </defs>
+      {/* Outer pulse ring */}
+      <circle 
+        cx={cx} 
+        cy={cy} 
+        r={10} 
+        fill={stroke} 
+        fillOpacity={0.2} 
+        className="animate-ping" 
+        style={{ animationDuration: '2s' }}
+      />
+      {/* Main glowing dot */}
+      <circle 
+        cx={cx} 
+        cy={cy} 
+        r={6} 
+        stroke="#ffffff" 
+        strokeWidth={2} 
+        fill={stroke} 
+        filter="url(#glow-dot)"
+        className="transition-transform duration-300"
+      />
+    </g>
+  );
+};
+
 export const HeartbeatGraph: React.FC<HeartbeatGraphProps> = ({ data }) => {
   // We focus on the core value: Is the system maintaining the target?
   const formattedData = data.map(d => ({
@@ -72,6 +107,7 @@ export const HeartbeatGraph: React.FC<HeartbeatGraphProps> = ({ data }) => {
               fill="transparent"
               name="Target Setpoint"
               animationDuration={1000}
+              activeDot={false}
             />
 
             <Area 
@@ -83,6 +119,7 @@ export const HeartbeatGraph: React.FC<HeartbeatGraphProps> = ({ data }) => {
               fill="url(#colorActual)" 
               name="Actual Indoor"
               animationDuration={1500}
+              activeDot={<CustomActiveDot />}
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -104,15 +141,15 @@ export const HeartbeatGraph: React.FC<HeartbeatGraphProps> = ({ data }) => {
 
          {/* Persona Lens Grid */}
          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white/[0.03] p-4 rounded-lg border border-white/5">
+            <div className="bg-white/[0.03] p-4 rounded-lg border border-white/5 group hover:border-blue-500/50 transition-colors">
                <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">For Homeowner</p>
                <p className="text-[11px] text-white font-bold leading-tight uppercase tracking-tighter">Gap-to-Goal: <span className="text-emerald-400">Stable</span>. Your system is hitting the mark.</p>
             </div>
-            <div className="bg-white/[0.03] p-4 rounded-lg border border-white/5">
+            <div className="bg-white/[0.03] p-4 rounded-lg border border-white/5 group hover:border-orange-500/50 transition-colors">
                <p className="text-[9px] font-black text-orange-400 uppercase tracking-widest mb-1">For Realtor</p>
                <p className="text-[11px] text-white font-bold leading-tight uppercase tracking-tighter">Efficiency: <span className="text-orange-400">98% Verified</span>. Ideal for MLS Listing.</p>
             </div>
-            <div className="bg-white/[0.03] p-4 rounded-lg border border-white/5">
+            <div className="bg-white/[0.03] p-4 rounded-lg border border-white/5 group hover:border-emerald-500/50 transition-colors">
                <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">For HVAC Tech</p>
                <p className="text-[11px] text-white font-bold leading-tight uppercase tracking-tighter">Cycles: <span className="text-emerald-400">Nominal</span>. No short-cycling detected.</p>
             </div>
