@@ -39,7 +39,6 @@ export const Dashboard: React.FC = () => {
   const [prediction, setPrediction] = useState<SystemStrainPrediction | null>(null);
   const [certificate, setCertificate] = useState<EfficiencyCertificate | null>(null);
   const [isMinting, setIsMinting] = useState(false);
-  const [isLiveOpsActive, setIsLiveOpsActive] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
   const [showImporter, setShowImporter] = useState(false);
   const [activeOutreachLead, setActiveOutreachLead] = useState<SalesLead | null>(null);
@@ -71,9 +70,12 @@ export const Dashboard: React.FC = () => {
     if (realLeads && realLeads.length > 0) {
       setLeads(realLeads);
     } else {
+      // Corrected Mock Leads to show Residential Home Addresses
       const mockLeads: SalesLead[] = [
-        { home_id: "H-101", address: "Atomic Air | 29 Jutland Rd", rebate_amount: 12500, status: 'new', created_at: new Date().toISOString() },
-        { home_id: "H-102", address: "Superior HVAC | 10 Belfield Rd", rebate_amount: 10600, status: 'contacted', created_at: new Date().toISOString() },
+        { home_id: "H-101", address: "123 Maple Avenue, Etobicoke", rebate_amount: 12500, status: 'new', created_at: new Date().toISOString() },
+        { home_id: "H-102", address: "456 Royal York Rd, Etobicoke", rebate_amount: 10600, status: 'contacted', created_at: new Date().toISOString() },
+        { home_id: "H-103", address: "789 The Queensway, Etobicoke", rebate_amount: 12000, status: 'new', created_at: new Date().toISOString() },
+        { home_id: "H-104", address: "32 Mimico Ave, Etobicoke", rebate_amount: 9800, status: 'new', created_at: new Date().toISOString() },
       ];
       setLeads(mockLeads);
     }
@@ -114,7 +116,7 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="max-w-[1500px] mx-auto space-y-6 animate-fade-in px-4 py-8 relative">
       
-      {/* HEADER: Simplified Language */}
+      {/* HEADER */}
       <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-6 px-10 bg-[#161d2e] border-2 border-white/5 rounded-xl shadow-3xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
         
@@ -251,11 +253,11 @@ export const Dashboard: React.FC = () => {
                         <div className="text-4xl font-black text-white tracking-tighter uppercase">${(leads.reduce((a, b) => a + b.rebate_amount, 0) / 1000).toFixed(0)}K</div>
                      </GlassCard>
                      <GlassCard className="border-l-[6px] border-l-emerald-500 bg-white/[0.03] p-8">
-                        <span className="text-[11px] font-black text-emerald-400 uppercase tracking-widest mb-1 block">Prospective Partners</span>
+                        <span className="text-[11px] font-black text-emerald-400 uppercase tracking-widest mb-1 block">Active Properties</span>
                         <div className="text-4xl font-black text-white tracking-tighter uppercase">{leads.length}</div>
                      </GlassCard>
                      <GlassCard className="border-l-[6px] border-l-blue-500 bg-white/[0.03] p-8">
-                        <span className="text-[11px] font-black text-blue-400 uppercase tracking-widest mb-1 block">Campaign Goal</span>
+                        <span className="text-[11px] font-black text-blue-400 uppercase tracking-widest mb-1 block">Pipeline Goal</span>
                         <div className="text-4xl font-black text-white tracking-tighter uppercase">74%</div>
                      </GlassCard>
                   </div>
@@ -263,17 +265,17 @@ export const Dashboard: React.FC = () => {
                     onClick={() => setShowImporter(true)}
                     className="ml-8 px-8 py-5 bg-orange-600 rounded-xl text-white font-black text-[11px] uppercase tracking-[0.3em] flex items-center gap-3 hover:bg-orange-500 transition-all shadow-xl active:scale-95"
                   >
-                    <Icons.Plus /> Sync Lead List
+                    <Icons.Plus /> Sync Home List
                   </button>
                 </div>
 
-                <GlassCard title="Regional Grant Pipeline" icon={<Icons.Activity />} className="border-2 p-0 overflow-hidden">
+                <GlassCard title="Property Grant Pipeline" icon={<Icons.Activity />} className="border-2 p-0 overflow-hidden">
                    <div className="overflow-x-auto">
                       <table className="w-full text-left">
                         <thead><tr className="bg-white/[0.05] border-b border-white/10">
-                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Business / Address</th>
-                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Grant Potential</th>
-                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Status</th>
+                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Home Address</th>
+                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Rebate Amount</th>
+                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Lead Status</th>
                           <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest text-right">Actions</th>
                         </tr></thead>
                         <tbody className="divide-y divide-white/5">
