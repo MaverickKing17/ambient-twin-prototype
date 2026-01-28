@@ -83,8 +83,8 @@ export const AISystemArchitect: React.FC<Props> = ({ device, readings }) => {
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
                <div className={`w-2 h-2 rounded-full ${isLoading ? 'bg-orange-500 animate-ping' : isCached ? 'bg-orange-500/50' : 'bg-emerald-500'}`} />
-               <span className="text-[9px] uppercase font-black tracking-widest text-white/40">
-                 {isLoading ? 'Thinking...' : `Last Checked: ${lastAnalyzed?.toLocaleTimeString() || 'Pending'}`}
+               <span className="text-[10px] uppercase font-black tracking-widest text-white/40">
+                 {isLoading ? 'Thinking...' : <span>Last Updated: <strong className="text-white font-black text-xs">{lastAnalyzed?.toLocaleTimeString() || 'Pending'}</strong></span>}
                </span>
             </div>
           </div>

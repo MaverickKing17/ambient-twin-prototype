@@ -30,7 +30,8 @@ const Icons = {
   Globe: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
   Share: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>,
   Mail: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>,
-  Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  Bell: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
 };
 
 export const Dashboard: React.FC = () => {
@@ -111,6 +112,7 @@ export const Dashboard: React.FC = () => {
   };
 
   const currentReading = readings.length > 0 ? readings[readings.length-1] : null;
+  const healthScore = prediction ? Math.round(prediction.efficiency_index * 100) : 0;
 
   return (
     <div className="max-w-[1500px] mx-auto space-y-6 animate-fade-in px-4 py-8 relative">
@@ -155,92 +157,179 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24">
         <main className="lg:col-span-12 space-y-8">
            {activeTab === 'twin' ? (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <aside className="lg:col-span-3 space-y-8">
-                   <GlassCard title="Home Zones" icon={<Icons.Activity />} className="p-0 overflow-hidden border-2">
-                      <div className="max-h-[700px] overflow-y-auto custom-scrollbar bg-slate-900/40">
-                         {isConnecting ? (
-                           <div className="p-20 text-center animate-pulse"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" /></div>
-                         ) : (
-                           devices.map((d) => (
-                            <button
-                              key={d.device_id}
-                              onClick={() => { setActiveDevice(d); loadDeviceData(d); }}
-                              className={`w-full p-6 border-b border-white/10 text-left transition-all flex items-center justify-between group relative ${activeDevice?.device_id === d.device_id ? 'bg-orange-600/20 border-l-[10px] border-l-orange-500' : 'hover:bg-white/[0.08]'}`}
-                            >
-                               <div className="space-y-1.5">
-                                  <span className="block text-[16px] font-black tracking-wide uppercase text-white">{d.properties.name}</span>
-                               </div>
-                               <div className={`px-4 py-2 rounded text-[11px] font-black uppercase tracking-widest border-2 ${d.properties.online ? 'bg-orange-600/30 text-white border-orange-500' : 'bg-red-600/30 text-white border-red-500'}`}>{d.properties.online ? 'Running' : 'Off'}</div>
-                            </button>
-                           ))
-                         )}
-                      </div>
-                   </GlassCard>
-
-                   <GlassCard title="Quick Insight Key" icon={<Icons.ShieldCheck />} variant="mica" className="border-2 border-emerald-500/20">
-                      <div className="space-y-4">
-                         <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981]" />
-                            <span className="text-[10px] font-black text-white/60 uppercase">System Performing Great</span>
-                         </div>
-                         <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-orange-400 shadow-[0_0_10px_#f97316]" />
-                            <span className="text-[10px] font-black text-white/60 uppercase">Action Needed for Grant</span>
-                         </div>
-                      </div>
-                   </GlassCard>
-                </aside>
-
-                <div className="lg:col-span-9 space-y-8">
-                  {!activeDevice ? (
-                    <GlassCard className="flex flex-col items-center justify-center py-80 bg-white/[0.01] border-dashed border-2">
-                      <h2 className="text-lg font-black text-white uppercase tracking-[0.5em] animate-pulse">Scanning Property...</h2>
-                    </GlassCard>
-                  ) : (
-                    <div className="space-y-8 animate-fade-in">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                          <GlassCard className="border-l-[8px] border-l-orange-500 shadow-3xl bg-gradient-to-br from-orange-600/10 to-transparent p-8">
-                            <div className="space-y-8">
-                              <div className="text-orange-400 font-black uppercase tracking-[0.3em] text-[14px]">System Wellness</div>
-                              <h2 className="text-3xl font-black text-white truncate uppercase">{activeDevice.properties.name}</h2>
-                              <div className="flex items-baseline gap-4">
-                                  <span className="text-7xl font-black text-white tracking-tighter">{currentReading?.indoorTemp.toFixed(1) || '--'}°</span>
-                                  <span className="text-white/40 text-[12px] font-black uppercase tracking-widest">Zone Temp</span>
-                              </div>
-                            </div>
-                          </GlassCard>
-                          <div className="md:col-span-2">
-                            <AISystemArchitect device={activeDevice} readings={readings} />
+              <div className="space-y-8">
+                {/* PROMINENT HERO ROW */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* MAIN HEALTH SCORE HERO */}
+                  <div className="lg:col-span-5">
+                    <GlassCard className="h-full border-l-[12px] border-l-orange-500 shadow-3xl bg-gradient-to-br from-orange-600/20 via-slate-900/50 to-transparent p-10 relative overflow-hidden flex flex-col justify-center">
+                       <div className="absolute top-0 right-0 p-6 opacity-10 scale-[3]"><Icons.Zap /></div>
+                       <div className="relative z-10 space-y-10">
+                          <div className="flex justify-between items-center">
+                             <div className="space-y-1">
+                                <span className="text-orange-400 font-black uppercase tracking-[0.4em] text-[12px]">Property Asset Wellness</span>
+                                <h2 className="text-4xl font-black text-white tracking-tighter uppercase">{activeDevice?.properties.name || 'Scanning...'}</h2>
+                             </div>
+                             <div className="px-4 py-2 bg-white/10 rounded-lg flex flex-col items-center">
+                                <span className="text-[9px] font-black text-white/40 uppercase">Zone Temp</span>
+                                <span className="text-2xl font-black text-white">{currentReading?.indoorTemp.toFixed(1) || '--'}°</span>
+                             </div>
                           </div>
-                      </div>
-                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                          <div className="lg:col-span-8">
-                            <GlassCard title="Efficiency Timeline" icon={<Icons.Activity />} className="border-2"><HeartbeatGraph data={readings} /></GlassCard>
-                          </div>
-                          <div className="lg:col-span-4 space-y-8">
-                            <GlassCard title="Breakdown Risk" icon={<Icons.Zap />} className="border-2">
-                                <div className="space-y-8">
-                                  <div className="flex justify-between items-end">
-                                      <span className={`text-6xl font-black tracking-tighter ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-orange-500' : 'text-emerald-400'}`}>{prediction?.strain_score || '--'}%</span>
-                                      <span className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-2">Stress Level</span>
-                                  </div>
-                                  <div className="w-full h-4 bg-white/10 rounded-full overflow-hidden">
-                                      <div className={`h-full transition-all duration-1000 ${prediction?.strain_score && prediction.strain_score > 50 ? 'bg-orange-500' : 'bg-emerald-500'}`} style={{ width: `${prediction?.strain_score || 0}%` }} />
-                                  </div>
+
+                          <div className="flex items-center gap-12">
+                             <div className="relative">
+                                <svg className="w-40 h-40 transform -rotate-90">
+                                   <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-white/5" />
+                                   <circle 
+                                      cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" 
+                                      strokeDasharray={440}
+                                      strokeDashoffset={440 - (440 * healthScore) / 100}
+                                      strokeLinecap="round"
+                                      className={`transition-all duration-1000 ${healthScore > 80 ? 'text-emerald-500' : healthScore > 60 ? 'text-orange-500' : 'text-red-500'}`} 
+                                   />
+                                </svg>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                   <span className="text-4xl font-black text-white tracking-tighter">{healthScore}%</span>
+                                   <span className="text-[9px] font-black text-white/40 uppercase">Health</span>
                                 </div>
-                            </GlassCard>
-                            {certificate ? <EfficiencyCertificateCard certificate={certificate} onUpdate={setCertificate} /> : (
-                                <GlassCard title="Home Value Passport" icon={<Icons.ShieldCheck />} variant="mica" className="border-2 p-8">
-                                  <button onClick={() => { setIsMinting(true); generateEfficiencyCertificate(activeDevice.device_id, prediction!).then(c => { setCertificate(c); setIsMinting(false); }); }} className="w-full py-6 bg-orange-600 rounded-xl text-[14px] font-black uppercase tracking-[0.3em] text-white shadow-xl shadow-orange-900/40">
-                                    {isMinting ? 'Verifying Data...' : 'Create Property Passport'}
-                                  </button>
-                                </GlassCard>
-                            )}
+                             </div>
+                             <div className="flex-1 space-y-4">
+                                <div className="space-y-1">
+                                   <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Efficiency Status</span>
+                                   <p className={`text-xl font-black uppercase ${healthScore > 80 ? 'text-emerald-400' : healthScore > 60 ? 'text-orange-400' : 'text-red-500'}`}>
+                                      {healthScore > 80 ? 'Excellent' : healthScore > 60 ? 'Optimal' : 'Intervention Needed'}
+                                   </p>
+                                </div>
+                                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                                   <span className="text-[10px] font-black text-white/60 uppercase block mb-2">Failure Probability</span>
+                                   <div className="flex items-center gap-3">
+                                      <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                                         <div className="h-full bg-red-500" style={{ width: `${prediction?.strain_score || 0}%` }} />
+                                      </div>
+                                      <span className="text-[11px] font-black text-white">{prediction?.strain_score || 0}%</span>
+                                   </div>
+                                </div>
+                             </div>
                           </div>
+                       </div>
+                    </GlassCard>
+                  </div>
+
+                  {/* PROMINENT RECENT ALERTS */}
+                  <div className="lg:col-span-7">
+                    <GlassCard title="Live Triage & System Alerts" icon={<Icons.Bell />} variant="mica" className="h-full border-2 border-orange-500/20 bg-slate-900/60 p-8">
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+                          <div className="space-y-4 overflow-y-auto custom-scrollbar pr-4 max-h-[300px]">
+                             {prediction && prediction.anomalies.length > 0 ? (
+                                prediction.anomalies.map((anomaly, idx) => (
+                                   <div key={idx} className="p-5 bg-orange-500/10 border-2 border-orange-500/30 rounded-xl flex items-start gap-4 animate-fade-in group hover:bg-orange-500/20 transition-all">
+                                      <div className="w-3 h-3 rounded-full bg-orange-500 mt-1.5 shadow-[0_0_12px_#f97316] group-hover:scale-125 transition-transform" />
+                                      <div className="flex flex-col">
+                                         <span className="text-[13px] font-black text-white uppercase tracking-tight">{anomaly}</span>
+                                         <span className="text-[10px] font-black text-orange-400 uppercase mt-1">Action Required</span>
+                                      </div>
+                                   </div>
+                                ))
+                             ) : (
+                                <div className="p-8 bg-emerald-500/5 border-2 border-emerald-500/20 rounded-xl flex flex-col items-center justify-center text-center space-y-4">
+                                   <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                      <Icons.ShieldCheck />
+                                   </div>
+                                   <span className="text-[12px] font-black text-white/60 uppercase tracking-widest">No Critical Anomalies Detected</span>
+                                </div>
+                             )}
+                          </div>
+                          <div className="bg-white/5 rounded-xl p-6 border border-white/10 flex flex-col justify-between">
+                             <div className="space-y-4">
+                                <span className="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">Mechanical Diagnosis</span>
+                                <p className="text-sm text-white font-bold leading-relaxed uppercase">
+                                   {prediction?.recommendations[0] || 'System heartbeat is within nominal operating range. No mechanical drag detected in blower cycles.'}
+                                </p>
+                             </div>
+                             <div className="pt-6 border-t border-white/10 flex justify-between items-center">
+                                <span className="text-[10px] font-black text-white/30 uppercase">Uplink: <strong className="text-emerald-400">Stable</strong></span>
+                                <button className="text-[10px] font-black text-orange-400 uppercase tracking-widest hover:underline">Full Log &rarr;</button>
+                             </div>
+                          </div>
+                       </div>
+                    </GlassCard>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  <aside className="lg:col-span-3 space-y-8">
+                    <GlassCard title="Home Zones" icon={<Icons.Activity />} className="p-0 overflow-hidden border-2">
+                        <div className="max-h-[500px] overflow-y-auto custom-scrollbar bg-slate-900/40">
+                          {isConnecting ? (
+                            <div className="p-20 text-center animate-pulse"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" /></div>
+                          ) : (
+                            devices.map((d) => (
+                              <button
+                                key={d.device_id}
+                                onClick={() => { setActiveDevice(d); loadDeviceData(d); }}
+                                className={`w-full p-6 border-b border-white/10 text-left transition-all flex items-center justify-between group relative ${activeDevice?.device_id === d.device_id ? 'bg-orange-600/20 border-l-[10px] border-l-orange-500' : 'hover:bg-white/[0.08]'}`}
+                              >
+                                <div className="space-y-1.5">
+                                    <span className="block text-[16px] font-black tracking-wide uppercase text-white">{d.properties.name}</span>
+                                </div>
+                                <div className={`px-4 py-2 rounded text-[11px] font-black uppercase tracking-widest border-2 ${d.properties.online ? 'bg-orange-600/30 text-white border-orange-500' : 'bg-red-600/30 text-white border-red-500'}`}>{d.properties.online ? 'Running' : 'Off'}</div>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                    </GlassCard>
+
+                    <GlassCard title="Quick Insight Key" icon={<Icons.ShieldCheck />} variant="mica" className="border-2 border-emerald-500/20">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3">
+                              <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981]" />
+                              <span className="text-[10px] font-black text-white/60 uppercase">System Performing Great</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                              <div className="w-2 h-2 rounded-full bg-orange-400 shadow-[0_0_10px_#f97316]" />
+                              <span className="text-[10px] font-black text-white/60 uppercase">Action Needed for Grant</span>
+                          </div>
+                        </div>
+                    </GlassCard>
+                  </aside>
+
+                  <div className="lg:col-span-9 space-y-8">
+                    {!activeDevice ? (
+                      <GlassCard className="flex flex-col items-center justify-center py-80 bg-white/[0.01] border-dashed border-2">
+                        <h2 className="text-lg font-black text-white uppercase tracking-[0.5em] animate-pulse">Scanning Property...</h2>
+                      </GlassCard>
+                    ) : (
+                      <div className="space-y-8 animate-fade-in">
+                        <AISystemArchitect device={activeDevice} readings={readings} />
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            <div className="lg:col-span-8">
+                              <GlassCard title="Efficiency Timeline" icon={<Icons.Activity />} className="border-2"><HeartbeatGraph data={readings} /></GlassCard>
+                            </div>
+                            <div className="lg:col-span-4 space-y-8">
+                              <GlassCard title="Breakdown Risk" icon={<Icons.Zap />} className="border-2">
+                                  <div className="space-y-8">
+                                    <div className="flex justify-between items-end">
+                                        <span className={`text-6xl font-black tracking-tighter ${prediction?.strain_score && prediction.strain_score > 50 ? 'text-orange-500' : 'text-emerald-400'}`}>{prediction?.strain_score || '--'}%</span>
+                                        <span className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-2">Stress Level</span>
+                                    </div>
+                                    <div className="w-full h-4 bg-white/10 rounded-full overflow-hidden">
+                                        <div className={`h-full transition-all duration-1000 ${prediction?.strain_score && prediction.strain_score > 50 ? 'bg-orange-500' : 'bg-emerald-500'}`} style={{ width: `${prediction?.strain_score || 0}%` }} />
+                                    </div>
+                                  </div>
+                              </GlassCard>
+                              {certificate ? <EfficiencyCertificateCard certificate={certificate} onUpdate={setCertificate} /> : (
+                                  <GlassCard title="Home Value Passport" icon={<Icons.ShieldCheck />} variant="mica" className="border-2 p-8">
+                                    <button onClick={() => { setIsMinting(true); generateEfficiencyCertificate(activeDevice.device_id, prediction!).then(c => { setCertificate(c); setIsMinting(false); }); }} className="w-full py-6 bg-orange-600 rounded-xl text-[14px] font-black uppercase tracking-[0.3em] text-white shadow-xl shadow-orange-900/40">
+                                      {isMinting ? 'Verifying Data...' : 'Create Property Passport'}
+                                    </button>
+                                  </GlassCard>
+                              )}
+                            </div>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
            ) : (
