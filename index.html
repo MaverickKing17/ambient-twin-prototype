@@ -1,22 +1,28 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <script>
-      // Crucial: This must run before any other scripts to prevent runtime crashes
-      window.process = window.process || { env: {} };
-      // If Vercel injects values into window, ensure they are mapped to process.env
-      if (window.API_KEY) window.process.env.API_KEY = window.API_KEY;
+      // Global process shim for environment variables in the browser
+      // Must be defined before any modules load.
+      window.process = {
+        env: {
+          NODE_ENV: 'production',
+          API_KEY: window.API_KEY || '',
+          NEXT_PUBLIC_SUPABASE_URL: '',
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: '',
+          NEXT_PUBLIC_SEAM_API_KEY: ''
+        }
+      };
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ambient Twin | HVAC Enterprise Command Center</title>
+    <title>Ambient Twin | GTA HVAC Command</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
       body {
         font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
-        background-color: #0b1120; /* Deep Azure Slate */
+        background-color: #0b1120;
         background-image: 
           radial-gradient(at 0% 0%, hsla(210, 40%, 15%, 1) 0, transparent 50%), 
           radial-gradient(at 100% 0%, hsla(25, 60%, 10%, 1) 0, transparent 50%);
@@ -25,21 +31,13 @@
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
       }
-      /* Microsoft-style scrollbars */
-      ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb {
         background: rgba(255, 255, 255, 0.1);
         border-radius: 10px;
       }
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(249, 115, 22, 0.4);
-      }
+      ::-webkit-scrollbar-thumb:hover { background: rgba(249, 115, 22, 0.4); }
       
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(8px); }
@@ -48,37 +46,26 @@
       .animate-fade-in {
         animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
-
-      @keyframes shimmer {
-        0% { transform: translateX(-150%); }
-        100% { transform: translateX(150%); }
-      }
-      .animate-shimmer {
-        animation: shimmer 2.5s infinite;
-      }
-
-      /* Fluent UI shadow depth */
-      .depth-shadow {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
-      }
     </style>
-  <script type="importmap">
+    <script type="importmap">
 {
   "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "recharts": "https://esm.sh/recharts@^3.7.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "recharts": "https://esm.sh/recharts@3.7.0",
     "jspdf": "https://esm.sh/jspdf@2.5.1",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.93.1",
-    "next/": "https://esm.sh/next@^16.1.4/",
-    "@google/genai": "https://esm.sh/@google/genai"
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.45.4",
+    "@google/genai": "https://esm.sh/@google/genai@0.21.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "next/": "https://esm.sh/next@^16.1.6/"
   }
 }
 </script>
-</head>
+  </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

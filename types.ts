@@ -52,6 +52,8 @@ export interface SalesLead {
   created_at: string;
   asset_grade?: 'A+' | 'A' | 'B' | 'C' | 'D';
   audit_progress?: number; // 0-100
+  grid_impact?: 'Low' | 'Moderate' | 'High'; // Toronto-specific demand response
+  program?: 'HER+' | 'Greener Homes' | 'Clean Energy Toronto';
 }
 
 export interface SystemStrainPrediction {
