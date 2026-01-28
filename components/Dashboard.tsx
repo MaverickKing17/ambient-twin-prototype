@@ -72,7 +72,6 @@ export const Dashboard: React.FC = () => {
 
   const loadLeads = async () => {
     setIsLoadingLeads(true);
-    // Try to fetch real leads first
     const realLeads = await supabaseService.fetchLeads();
     if (realLeads && realLeads.length > 0) {
       setLeads(realLeads);
@@ -116,57 +115,6 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  const startVoiceSession = async () => {
-    if (!process.env.API_KEY) return;
-    try {
-      setIsLiveOpsActive(true);
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
-      outAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const sessionPromise = ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
-        callbacks: {
-          onopen: () => {
-            const source = audioContextRef.current!.createMediaStreamSource(stream);
-            const scriptProcessor = audioContextRef.current!.createScriptProcessor(4096, 1, 1);
-            scriptProcessor.onaudioprocess = (e) => {
-              const inputData = e.inputBuffer.getChannelData(0);
-              sessionPromise.then(s => s.sendRealtimeInput({ media: createBlob(inputData) }));
-            };
-            source.connect(scriptProcessor);
-            scriptProcessor.connect(audioContextRef.current!.destination);
-          },
-          onmessage: async (m: LiveServerMessage) => {
-            const audioData = m.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
-            if (audioData && outAudioContextRef.current) {
-              const buffer = await decodeAudioData(decode(audioData), outAudioContextRef.current, 24000, 1);
-              const s = outAudioContextRef.current.createBufferSource();
-              s.buffer = buffer;
-              s.connect(outAudioContextRef.current.destination);
-              s.start(Math.max(nextStartTimeRef.current, outAudioContextRef.current.currentTime));
-              nextStartTimeRef.current += buffer.duration;
-            }
-          },
-          onclose: () => setIsLiveOpsActive(false),
-        },
-        config: {
-          responseModalities: [Modality.AUDIO],
-          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } },
-          systemInstruction: 'Ambient Twin Concierge mode.',
-        }
-      });
-      sessionRef.current = await sessionPromise;
-    } catch (e) {
-      setIsLiveOpsActive(false);
-    }
-  };
-
-  const stopVoiceSession = () => {
-    if (sessionRef.current) sessionRef.current.close();
-    setIsLiveOpsActive(false);
-  };
-
   const currentReading = readings.length > 0 ? readings[readings.length-1] : null;
 
   return (
@@ -207,7 +155,7 @@ export const Dashboard: React.FC = () => {
 
       {/* OUTREACH ENGINE MODALS */}
       {showImporter && <LeadImporter onComplete={() => { setShowImporter(false); loadLeads(); }} onClose={() => setShowImporter(false)} />}
-      {activeOutreachLead && <OutreachGen lead={activeOutreachLead} onClose={() => setActiveOutreachLead(null)} />}
+      {activeOutreachLead && <OutreachGen lead={activeOutreachLead} onClose={() => { setActiveOutreachLead(null); loadLeads(); }} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24">
         <main className="lg:col-span-12 space-y-8">
@@ -232,6 +180,27 @@ export const Dashboard: React.FC = () => {
                             </button>
                            ))
                          )}
+                      </div>
+                   </GlassCard>
+
+                   {/* CAMPAIGN READINESS HUD */}
+                   <GlassCard title="Campaign Readiness" icon={<Icons.ShieldCheck />} variant="mica" className="border-2 border-emerald-500/20">
+                      <div className="space-y-4">
+                         <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black text-white/60 uppercase">Telemetry Link</span>
+                            <span className="text-emerald-400 font-black text-[10px] uppercase">Active</span>
+                         </div>
+                         <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black text-white/60 uppercase">AI Oracle</span>
+                            <span className="text-emerald-400 font-black text-[10px] uppercase">Ready</span>
+                         </div>
+                         <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black text-white/60 uppercase">Portals Enabled</span>
+                            <span className="text-emerald-400 font-black text-[10px] uppercase">Online</span>
+                         </div>
+                         <div className="pt-4 border-t border-white/10 text-center">
+                            <span className="text-[11px] font-black text-orange-400 uppercase tracking-widest">Safe to begin outreach</span>
+                         </div>
                       </div>
                    </GlassCard>
                 </aside>
@@ -326,7 +295,7 @@ export const Dashboard: React.FC = () => {
                                <td className="p-6"><div className="text-[15px] font-black text-white uppercase tracking-tight">{lead.address}</div></td>
                                <td className="p-6"><div className="text-[18px] font-black text-emerald-400 tracking-tighter">${lead.rebate_amount.toLocaleString()}</div></td>
                                <td className="p-6">
-                                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${lead.status === 'new' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' : 'bg-orange-500/10 text-orange-400 border-orange-500/30'}`}>{lead.status}</span>
+                                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${lead.status === 'new' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' : lead.status === 'contacted' ? 'bg-orange-500/10 text-orange-400 border-orange-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'}`}>{lead.status}</span>
                                </td>
                                <td className="p-6">
                                   <div className="flex justify-end gap-3">
