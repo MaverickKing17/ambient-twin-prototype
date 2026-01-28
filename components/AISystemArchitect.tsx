@@ -26,21 +26,19 @@ export const AISystemArchitect: React.FC<Props> = ({ device, readings }) => {
       setIsCached(!!result.isCached);
       setLastAnalyzed(new Date());
     } catch (e) {
-      setInsight("Uplink failed. Please verify API credentials.");
+      setInsight("Unable to connect to AI server. Check internet.");
     } finally {
       setIsLoading(false);
     }
   }, [device.device_id, readings]);
 
   useEffect(() => {
-    // Automatic fetch only on component mount or device change
-    // We do NOT fetch on every 'readings' update to save quota
     fetchInsight();
   }, [device.device_id]);
 
   return (
     <GlassCard 
-      title="System Intelligence Oracle" 
+      title="Smart System Analysis" 
       icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>}
       className="bg-gradient-to-br from-orange-500/[0.05] to-transparent border-orange-500/20 relative"
     >
@@ -50,23 +48,19 @@ export const AISystemArchitect: React.FC<Props> = ({ device, readings }) => {
             <div className="h-3 bg-white/20 rounded w-full"></div>
             <div className="h-3 bg-white/20 rounded w-11/12"></div>
             <div className="h-3 bg-white/20 rounded w-9/12"></div>
-            <div className="pt-4 flex gap-2">
-               <div className="h-4 bg-white/10 w-20 rounded"></div>
-               <div className="h-4 bg-white/10 w-20 rounded"></div>
-            </div>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="text-[14px] text-white leading-[1.6] font-bold">
                <span className="text-orange-400 font-black mr-2 uppercase tracking-tighter italic">
-                 {isCached ? 'CACHED INSIGHT:' : 'LIVE ANALYSIS:'}
+                 {isCached ? 'SAVED SUMMARY:' : 'LIVE AI SUMMARY:'}
                </span>
                {insight}
             </div>
             
             {sources.length > 0 && (
               <div className="pt-4 border-t border-white/5 space-y-2">
-                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Verification Sources:</p>
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Reference Links:</p>
                 <div className="flex flex-wrap gap-2">
                   {sources.map((s, i) => (
                     <a 
@@ -90,7 +84,7 @@ export const AISystemArchitect: React.FC<Props> = ({ device, readings }) => {
             <div className="flex items-center gap-2">
                <div className={`w-2 h-2 rounded-full ${isLoading ? 'bg-orange-500 animate-ping' : isCached ? 'bg-orange-500/50' : 'bg-emerald-500'}`} />
                <span className="text-[9px] uppercase font-black tracking-widest text-white/40">
-                 {isLoading ? 'Processing...' : `Last Sync: ${lastAnalyzed?.toLocaleTimeString() || 'Pending'}`}
+                 {isLoading ? 'Thinking...' : `Last Checked: ${lastAnalyzed?.toLocaleTimeString() || 'Pending'}`}
                </span>
             </div>
           </div>
@@ -100,7 +94,7 @@ export const AISystemArchitect: React.FC<Props> = ({ device, readings }) => {
             disabled={isLoading}
             className="px-4 py-1.5 bg-white/5 hover:bg-orange-600 border border-white/10 rounded text-[9px] font-black text-white uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
           >
-            Refresh Intel
+            Re-Analyze
           </button>
         </div>
       </div>

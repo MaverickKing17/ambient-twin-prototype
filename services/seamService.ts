@@ -7,7 +7,6 @@ export const SEAM_API_KEY = process.env.NEXT_PUBLIC_SEAM_API_KEY || '';
 export class SeamService {
   
   public async listDevices(accessToken: string, providerHint?: ProviderType): Promise<SeamDevice[]> {
-    // Check if we should use the Edge Function proxy (Production Way)
     if (supabase) {
       try {
         const { data, error } = await supabase.functions.invoke('seam-proxy', {
@@ -19,12 +18,10 @@ export class SeamService {
       }
     }
 
-    // MOCK/DIRECT FALLBACK (For testing or if Edge Function is not yet deployed)
     return this.getMockDeviceFleet();
   }
 
   public async getTelemetryHistory(deviceId: string): Promise<TelemetryReading[]> {
-    // In production, this would also be an Edge Function call to keep the API key safe
     if (supabase) {
       try {
         const { data, error } = await supabase.functions.invoke('seam-proxy', {
@@ -34,7 +31,6 @@ export class SeamService {
       } catch (e) {}
     }
 
-    // Default simulation logic for local UI development
     const now = Date.now();
     return Array.from({ length: 24 }, (_, i) => {
       const timeOffset = (23 - i) * 3600000;
@@ -54,15 +50,15 @@ export class SeamService {
   }
 
   private getMockDeviceFleet(): SeamDevice[] {
+    // Technical IDs mapped to Real Room Names
     const devices = [
-      { name: "Round", online: false, id: "01" },
-      { name: "Pro", online: false, id: "02" },
-      { name: "T5-Cool", online: true, id: "03" },
-      { name: "T5-Heat", online: true, id: "04" },
-      { name: "T5", online: true, id: "05" },
-      { name: "T61", online: true, id: "06" },
-      { name: "Living Room", online: false, id: "07" },
-      { name: "D62", online: true, id: "08" },
+      { name: "Master Bedroom", online: true, id: "01" },
+      { name: "Main Floor Living", online: true, id: "02" },
+      { name: "Basement Studio", online: true, id: "03" },
+      { name: "Home Office", online: true, id: "04" },
+      { name: "Kitchen / Dining", online: false, id: "05" },
+      { name: "Guest Suite", online: true, id: "06" },
+      { name: "Garage Workshop", online: false, id: "07" },
     ];
 
     return devices.map(d => ({
