@@ -43,30 +43,6 @@ export interface TelemetryReading {
   powerUsageWatts: number;
 }
 
-// Supabase Database Schema: 'system_strain_logs'
-export interface SystemStrainInput {
-  user_id: string; // Link to Supabase Auth User ID
-  device_id: string;
-  provider: ProviderType;
-  readings: TelemetryReading[]; 
-  metadata: {
-    firmware_version: string;
-    last_service_date: string;
-    sq_footage: number;
-  };
-}
-
-// Supabase Database Schema: 'predictions'
-export interface SystemStrainPrediction {
-  id: string;
-  created_at: number;
-  strain_score: number; // 0-100 (Higher is worse)
-  efficiency_index: number; // 0-1 (1 is perfect efficiency)
-  failure_risk: 'LOW' | 'MODERATE' | 'CRITICAL';
-  anomalies: string[];
-  recommendations: string[];
-}
-
 // Supabase Database Schema: 'leads'
 export interface SalesLead {
   home_id: string;
@@ -74,9 +50,20 @@ export interface SalesLead {
   rebate_amount: number;
   status: 'new' | 'contacted' | 'closed';
   created_at: string;
+  asset_grade?: 'A+' | 'A' | 'B' | 'C' | 'D';
+  audit_progress?: number; // 0-100
 }
 
-// Web 3.0 Ledger Interface
+export interface SystemStrainPrediction {
+  id: string;
+  created_at: number;
+  strain_score: number;
+  efficiency_index: number;
+  failure_risk: 'LOW' | 'MODERATE' | 'CRITICAL';
+  anomalies: string[];
+  recommendations: string[];
+}
+
 export interface EfficiencyCertificate {
   id: string;
   assetHash: string; 

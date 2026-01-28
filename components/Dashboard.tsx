@@ -70,12 +70,11 @@ export const Dashboard: React.FC = () => {
     if (realLeads && realLeads.length > 0) {
       setLeads(realLeads);
     } else {
-      // Corrected Mock Leads to show Residential Home Addresses
       const mockLeads: SalesLead[] = [
-        { home_id: "H-101", address: "123 Maple Avenue, Etobicoke", rebate_amount: 12500, status: 'new', created_at: new Date().toISOString() },
-        { home_id: "H-102", address: "456 Royal York Rd, Etobicoke", rebate_amount: 10600, status: 'contacted', created_at: new Date().toISOString() },
-        { home_id: "H-103", address: "789 The Queensway, Etobicoke", rebate_amount: 12000, status: 'new', created_at: new Date().toISOString() },
-        { home_id: "H-104", address: "32 Mimico Ave, Etobicoke", rebate_amount: 9800, status: 'new', created_at: new Date().toISOString() },
+        { home_id: "H-101", address: "123 Maple Avenue, Etobicoke", rebate_amount: 12500, status: 'new', created_at: new Date().toISOString(), asset_grade: 'A+', audit_progress: 85 },
+        { home_id: "H-102", address: "456 Royal York Rd, Etobicoke", rebate_amount: 10600, status: 'contacted', created_at: new Date().toISOString(), asset_grade: 'B', audit_progress: 40 },
+        { home_id: "H-103", address: "789 The Queensway, Etobicoke", rebate_amount: 12000, status: 'new', created_at: new Date().toISOString(), asset_grade: 'A', audit_progress: 75 },
+        { home_id: "H-104", address: "32 Mimico Ave, Etobicoke", rebate_amount: 9800, status: 'new', created_at: new Date().toISOString(), asset_grade: 'C', audit_progress: 15 },
       ];
       setLeads(mockLeads);
     }
@@ -249,16 +248,16 @@ export const Dashboard: React.FC = () => {
                 <div className="flex justify-between items-end">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
                      <GlassCard className="border-l-[6px] border-l-orange-500 bg-white/[0.03] p-8">
-                        <span className="text-[11px] font-black text-orange-400 uppercase tracking-widest mb-1 block">Total Grant Value</span>
-                        <div className="text-4xl font-black text-white tracking-tighter uppercase">${(leads.reduce((a, b) => a + b.rebate_amount, 0) / 1000).toFixed(0)}K</div>
+                        <span className="text-[11px] font-black text-orange-400 uppercase tracking-widest mb-1 block">Projected Equity Unlock</span>
+                        <div className="text-4xl font-black text-white tracking-tighter uppercase">${(leads.reduce((a, b) => a + b.rebate_amount, 0) / 1000).toFixed(1)}K</div>
                      </GlassCard>
                      <GlassCard className="border-l-[6px] border-l-emerald-500 bg-white/[0.03] p-8">
-                        <span className="text-[11px] font-black text-emerald-400 uppercase tracking-widest mb-1 block">Active Properties</span>
+                        <span className="text-[11px] font-black text-emerald-400 uppercase tracking-widest mb-1 block">Active Home Profiles</span>
                         <div className="text-4xl font-black text-white tracking-tighter uppercase">{leads.length}</div>
                      </GlassCard>
                      <GlassCard className="border-l-[6px] border-l-blue-500 bg-white/[0.03] p-8">
-                        <span className="text-[11px] font-black text-blue-400 uppercase tracking-widest mb-1 block">Pipeline Goal</span>
-                        <div className="text-4xl font-black text-white tracking-tighter uppercase">74%</div>
+                        <span className="text-[11px] font-black text-blue-400 uppercase tracking-widest mb-1 block">Verification Rate</span>
+                        <div className="text-4xl font-black text-white tracking-tighter uppercase">62%</div>
                      </GlassCard>
                   </div>
                   <button 
@@ -269,22 +268,39 @@ export const Dashboard: React.FC = () => {
                   </button>
                 </div>
 
-                <GlassCard title="Property Grant Pipeline" icon={<Icons.Activity />} className="border-2 p-0 overflow-hidden">
+                <GlassCard title="Energy Asset Pipeline" icon={<Icons.Activity />} className="border-2 p-0 overflow-hidden">
                    <div className="overflow-x-auto">
                       <table className="w-full text-left">
                         <thead><tr className="bg-white/[0.05] border-b border-white/10">
                           <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Home Address</th>
-                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Rebate Amount</th>
-                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Lead Status</th>
+                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Asset Grade</th>
+                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Grant Value</th>
+                          <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest">Audit Progress</th>
                           <th className="p-6 text-[11px] font-black text-white uppercase tracking-widest text-right">Actions</th>
                         </tr></thead>
                         <tbody className="divide-y divide-white/5">
                            {leads.map((lead, idx) => (
                              <tr key={idx} className="hover:bg-white/[0.03] transition-colors group">
-                               <td className="p-6"><div className="text-[15px] font-black text-white uppercase tracking-tight">{lead.address}</div></td>
-                               <td className="p-6"><div className="text-[18px] font-black text-emerald-400 tracking-tighter">${lead.rebate_amount.toLocaleString()}</div></td>
                                <td className="p-6">
-                                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${lead.status === 'new' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' : lead.status === 'contacted' ? 'bg-orange-500/10 text-orange-400 border-orange-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'}`}>{lead.status === 'new' ? 'Waiting' : lead.status}</span>
+                                 <div className="text-[15px] font-black text-white uppercase tracking-tight">{lead.address}</div>
+                                 <div className="text-[10px] text-white/40 font-black uppercase tracking-widest mt-1">ID: {lead.home_id}</div>
+                               </td>
+                               <td className="p-6">
+                                 <div className={`text-2xl font-black tracking-tighter ${lead.asset_grade?.startsWith('A') ? 'text-emerald-400' : 'text-orange-400'}`}>
+                                   {lead.asset_grade}
+                                 </div>
+                               </td>
+                               <td className="p-6">
+                                 <div className="text-[18px] font-black text-white tracking-tighter">${lead.rebate_amount.toLocaleString()}</div>
+                                 <div className="text-[9px] text-emerald-400 font-black uppercase tracking-widest">HER+ Eligible</div>
+                               </td>
+                               <td className="p-6">
+                                  <div className="flex items-center gap-4">
+                                    <div className="flex-1 min-w-[100px] h-2 bg-white/5 rounded-full overflow-hidden">
+                                      <div className="h-full bg-orange-500" style={{ width: `${lead.audit_progress}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-black text-white/60 uppercase">{lead.audit_progress}%</span>
+                                  </div>
                                </td>
                                <td className="p-6">
                                   <div className="flex justify-end gap-3">
@@ -294,7 +310,7 @@ export const Dashboard: React.FC = () => {
                                     >
                                       <Icons.Mail /> AI Email
                                     </button>
-                                    <button onClick={() => window.location.hash = `#portal/${lead.home_id}`} className="text-[10px] font-black text-white bg-white/5 px-4 py-2 rounded-lg border border-white/10 flex items-center gap-2 hover:text-orange-400 transition-all uppercase tracking-widest shadow-sm"><Icons.Share /> Client Portal</button>
+                                    <button onClick={() => window.location.hash = `#portal/${lead.home_id}`} className="text-[10px] font-black text-white bg-white/5 px-4 py-2 rounded-lg border border-white/10 flex items-center gap-2 hover:text-orange-400 transition-all uppercase tracking-widest shadow-sm"><Icons.Share /> Portal</button>
                                   </div>
                                </td>
                              </tr>
