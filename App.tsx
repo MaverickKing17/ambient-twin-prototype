@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { PublicVerificationPage } from './components/PublicVerificationPage';
 import { HomeownerPortal } from './components/HomeownerPortal';
 import { LoginScreen } from './components/LoginScreen';
+import PricingSection from './components/PricingSection'; // IMPORT THE NEW SECTION
 import { supabase } from './services/supabaseService';
 
 const App: React.FC = () => {
@@ -26,7 +26,7 @@ const App: React.FC = () => {
     };
     checkUser();
 
-    // 2. Listen for auth changes - Added robust optional chaining to prevent black screen crash
+    // 2. Listen for auth changes
     const authSubscription = supabase?.auth?.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' || session) {
         setIsAuthenticated(true);
@@ -59,6 +59,11 @@ const App: React.FC = () => {
       const homeId = route.split('/')[1];
       return <HomeownerPortal homeId={homeId} />;
     }
+    
+    // Dedicated Pricing Route (for sending direct links: your-app.com/#pricing)
+    if (route === '#pricing') {
+       return <PricingSection />;
+    }
 
     if (isInitializing) {
       return (
@@ -68,16 +73,24 @@ const App: React.FC = () => {
       );
     }
 
-    // PROTECTED ROUTES (Contractor Only)
+    // PROTECTED ROUTES
     if (isAuthenticated) {
       return <Dashboard />;
     } else {
-      return <LoginScreen onLogin={handleLoginSuccess} />;
+      // LANDING PAGE STRATEGY: Show Login, then show Pricing below it!
+      return (
+        <div className="flex flex-col">
+          <LoginScreen onLogin={handleLoginSuccess} />
+          <div id="pricing-section">
+            <PricingSection />
+          </div>
+        </div>
+      );
     }
   };
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[#0b1120]">
       {renderContent()}
     </div>
   );
