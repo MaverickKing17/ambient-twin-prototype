@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Dashboard } from './components/Dashboard';
-import { PublicVerificationPage } from './components/PublicVerificationPage';
-import { HomeownerPortal } from './components/HomeownerPortal';
-import { LoginScreen } from './components/LoginScreen';
-import PricingSection from './components/PricingSection'; // IMPORT THE NEW SECTION
-import { supabase } from './services/supabaseService';
+import { Dashboard } from './components/Dashboard.tsx';
+import { PublicVerificationPage } from './components/PublicVerificationPage.tsx';
+import { HomeownerPortal } from './components/HomeownerPortal.tsx';
+import { LoginScreen } from './components/LoginScreen.tsx';
+import { supabase } from './services/supabaseService.ts';
 
 const App: React.FC = () => {
   const [route, setRoute] = useState(window.location.hash);
@@ -59,11 +58,6 @@ const App: React.FC = () => {
       const homeId = route.split('/')[1];
       return <HomeownerPortal homeId={homeId} />;
     }
-    
-    // Dedicated Pricing Route (for sending direct links: your-app.com/#pricing)
-    if (route === '#pricing') {
-       return <PricingSection />;
-    }
 
     if (isInitializing) {
       return (
@@ -73,24 +67,16 @@ const App: React.FC = () => {
       );
     }
 
-    // PROTECTED ROUTES
+    // PROTECTED ROUTES (Contractor Only)
     if (isAuthenticated) {
       return <Dashboard />;
     } else {
-      // LANDING PAGE STRATEGY: Show Login, then show Pricing below it!
-      return (
-        <div className="flex flex-col">
-          <LoginScreen onLogin={handleLoginSuccess} />
-          <div id="pricing-section">
-            <PricingSection />
-          </div>
-        </div>
-      );
+      return <LoginScreen onLogin={handleLoginSuccess} />;
     }
   };
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[#0b1120]">
+    <div className="min-h-screen w-full overflow-x-hidden">
       {renderContent()}
     </div>
   );

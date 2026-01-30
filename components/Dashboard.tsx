@@ -5,6 +5,7 @@ import { EfficiencyCertificateCard } from './EfficiencyCertificateCard';
 import { AISystemArchitect } from './AISystemArchitect';
 import { LeadImporter } from './LeadImporter';
 import { OutreachGen } from './OutreachGen';
+import { OnboardingTour } from './OnboardingTour';
 import { generateEfficiencyCertificate } from '../services/ledgerService';
 import { seamService, SEAM_API_KEY } from '../services/seamService';
 import { supabaseService, supabase } from '../services/supabaseService'; 
@@ -36,6 +37,7 @@ export const Dashboard: React.FC = () => {
   const [demoMode, setDemoMode] = useState(false);
   const [showImporter, setShowImporter] = useState(false);
   const [activeOutreachLead, setActiveOutreachLead] = useState<SalesLead | null>(null);
+  const [showTour, setShowTour] = useState(false);
   
   const [devices, setDevices] = useState<SeamDevice[]>([]);
   const [activeDevice, setActiveDevice] = useState<SeamDevice | null>(null);
@@ -45,8 +47,14 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     handleConnectProvider(ProviderType.HONEYWELL);
-    if (process.env.API_KEY) {
+    if (typeof process !== 'undefined' && process.env?.API_KEY) {
       setGeminiStatus('linked');
+    }
+
+    // Check if user has seen tour
+    const hasSeenTour = localStorage.getItem('ambient_tour_completed');
+    if (!hasSeenTour) {
+      setShowTour(true);
     }
   }, []);
 
@@ -102,9 +110,16 @@ export const Dashboard: React.FC = () => {
   const currentReading = readings.length > 0 ? readings[readings.length-1] : null;
   const healthScore = prediction ? Math.round(prediction.efficiency_index * 100) : 0;
 
+  const handleTourComplete = () => {
+    setShowTour(false);
+    localStorage.setItem('ambient_tour_completed', 'true');
+  };
+
   return (
     <div className="max-w-[1500px] mx-auto space-y-6 animate-fade-in px-4 py-8 relative">
-      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-6 px-10 bg-[#161d2e] border-2 border-white/5 rounded-xl shadow-3xl relative overflow-hidden">
+      {showTour && <OnboardingTour onComplete={handleTourComplete} />}
+      
+      <header id="tour-header" className="flex flex-col lg:flex-row justify-between items-start lg:items-center py-6 px-10 bg-[#161d2e] border-2 border-white/5 rounded-xl shadow-3xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
         <div className="flex items-center gap-6">
            <div className="h-12 w-12 rounded-xl bg-orange-600 flex items-center justify-center shadow-2xl shadow-orange-900/50">
@@ -123,7 +138,7 @@ export const Dashboard: React.FC = () => {
            </div>
         </div>
         <nav className="flex items-center gap-10 mt-8 lg:mt-0">
-          <button onClick={() => setActiveTab('twin')} className={`text-[13px] font-black uppercase tracking-[0.3em] transition-all relative py-3 ${activeTab === 'twin' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>Home Health Twin</button>
+          <button id="tour-ledger-btn" onClick={() => setActiveTab('twin')} className={`text-[13px] font-black uppercase tracking-[0.3em] transition-all relative py-3 ${activeTab === 'twin' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>Home Health Twin</button>
           <button onClick={() => setActiveTab('leads')} className={`text-[13px] font-black uppercase tracking-[0.3em] transition-all relative py-3 ${activeTab === 'leads' ? 'text-white border-b-2 border-orange-500' : 'text-white/60 hover:text-white'}`}>GTA Grant Ledger</button>
           <div className="h-8 w-px bg-white/10" />
           <button onClick={() => supabase?.auth.signOut()} className="text-white hover:text-red-400 transition-colors p-3 scale-125"><Icons.Power /></button>
@@ -137,7 +152,7 @@ export const Dashboard: React.FC = () => {
         {activeTab === 'twin' ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* HERO: PROMINENT HEALTH SCORE GAUGE */}
-            <div className="lg:col-span-5">
+            <div id="tour-health" className="lg:col-span-5">
               <GlassCard className="h-full border-l-[12px] border-l-orange-500 shadow-3xl bg-gradient-to-br from-orange-600/20 via-slate-900/80 to-transparent p-10 relative overflow-hidden flex flex-col justify-between">
                  <div className="absolute top-0 right-0 p-8 opacity-5 scale-[4] pointer-events-none"><Icons.Zap /></div>
                  <div className="relative z-10 space-y-8">
@@ -190,12 +205,12 @@ export const Dashboard: React.FC = () => {
             </div>
 
             {/* AI ANALYSIS SECTION */}
-            <div className="lg:col-span-7">
-              <AISystemArchitect device={activeDevice!} readings={readings} />
+            <div id="tour-ai" className="lg:col-span-7">
+              {activeDevice && <AISystemArchitect device={activeDevice} readings={readings} />}
             </div>
 
             {/* HIGH PROMINENCE RECENT ALERTS */}
-            <div className="lg:col-span-12">
+            <div id="tour-alerts" className="lg:col-span-12">
                <GlassCard title="Live Infrastructure Alerts & Triage" icon={<Icons.Bell />} variant="mica" className="border-2 border-orange-500/20">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {prediction && prediction.anomalies.length > 0 ? (
@@ -224,7 +239,7 @@ export const Dashboard: React.FC = () => {
                 <HeartbeatGraph data={readings} />
               </GlassCard>
             </div>
-            <div className="lg:col-span-4">
+            <div id="tour-passport" className="lg:col-span-4">
               {certificate ? <EfficiencyCertificateCard certificate={certificate} onUpdate={setCertificate} /> : (
                   <GlassCard title="Asset Passport" icon={<Icons.ShieldCheck />} variant="mica" className="border-2 p-10 bg-gradient-to-br from-orange-600/10 to-transparent">
                     <p className="text-[11px] text-white/60 font-medium uppercase text-center mb-6 leading-relaxed">Seal your HVAC efficiency on the Toronto Ledger to unlock Enbridge $12k grants and boost property value.</p>

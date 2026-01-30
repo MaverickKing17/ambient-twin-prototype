@@ -3,20 +3,14 @@
   <head>
     <script>
       // Global process shim for environment variables in the browser
-      // Must be defined before any modules load.
-      window.process = {
-        env: {
-          NODE_ENV: 'production',
-          API_KEY: window.API_KEY || '',
-          NEXT_PUBLIC_SUPABASE_URL: '',
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: '',
-          NEXT_PUBLIC_SEAM_API_KEY: ''
-        }
-      };
+      // Must be defined before any ESM modules load.
+      if (!window.process) window.process = { env: {} };
+      if (!window.process.env) window.process.env = {};
+      window.process.env.NODE_ENV = window.process.env.NODE_ENV || 'production';
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ambient Twin | GTA HVAC Command</title>
+    <title>Ambient Twin | Toronto HVAC Command</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -53,12 +47,12 @@
     "react": "https://esm.sh/react@19.0.0",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "recharts": "https://esm.sh/recharts@3.7.0",
+    "recharts": "https://esm.sh/recharts@2.15.0?external=react,react-dom",
     "jspdf": "https://esm.sh/jspdf@2.5.1",
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.45.4",
     "@google/genai": "https://esm.sh/@google/genai@0.21.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "react/": "https://esm.sh/react@^19.2.4/",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "next/": "https://esm.sh/next@^16.1.6/"
   }
 }

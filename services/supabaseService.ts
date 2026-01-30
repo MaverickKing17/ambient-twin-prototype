@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { SystemStrainPrediction, TelemetryReading, SalesLead } from '../types';
 
@@ -6,9 +5,15 @@ import { SystemStrainPrediction, TelemetryReading, SalesLead } from '../types';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = (supabaseUrl && supabaseKey && !supabaseUrl.includes('YOUR_SUPABASE_URL'))
-  ? createClient(supabaseUrl, supabaseKey) 
-  : null;
+// Robust check to ensure environment variables are valid before creating client
+const isValidConfig = 
+  supabaseUrl && 
+  supabaseKey && 
+  typeof supabaseUrl === 'string' && 
+  !supabaseUrl.includes('YOUR_SUPABASE_URL') &&
+  supabaseUrl.startsWith('http');
+
+export const supabase = isValidConfig ? createClient(supabaseUrl, supabaseKey) : null;
 
 export class SupabaseService {
   
